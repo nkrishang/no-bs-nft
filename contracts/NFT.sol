@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.0;
 
+// Base contract credit: OpenZeppelin
 import "./ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
 
 contract NFT is ERC721PresetMinterPauserAutoId {
