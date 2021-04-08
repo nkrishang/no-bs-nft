@@ -13,7 +13,13 @@ contract NFT is ERC721PresetMinterPauserAutoId {
         uint bidValue;
     }
 
+    struct Threshold {
+        uint value;
+        bool active;
+    }
+
     mapping(uint => Bid) public bids;
+    mapping(uint => Threshold) public threshold;
     mapping(uint => string) public URI;
 
     event NewBid(uint indexed tokenID, address indexed bidder, uint bidValue);
@@ -29,6 +35,14 @@ contract NFT is ERC721PresetMinterPauserAutoId {
     function mint(address _to, string calldata _URI) public {
         uint tokenId = mint(_to);
         URI[tokenId] = _URI;
+    }
+
+    function setThreshold(uint _tokenId, uint _value, bool _active) external {
+        require(_exists(_tokenId), "ERC721: token has not been minted.");
+        require(msg.sender == ownerOf(_tokenId), "Only the token owner can accept the bid.");
+
+        threshold[_tokenId].value = _value;
+        threshold[_tokenId].active = _active;
     }
 
     /// @notice Lets an address make a bid of value `_bidValue` for toen with id `tokenId`.
@@ -73,11 +87,22 @@ contract NFT is ERC721PresetMinterPauserAutoId {
     // ========== Getter functions ==========
 
     function getCurrentBidValue(uint _tokenId) public view returns (uint) {
+        require(_exists(_tokenId), "ERC721: token has not been minted.");
         return bids[_tokenId].bidValue;
     }
 
     function getCurrentBidder(uint _tokenId) public view returns (address) {
+        require(_exists(_tokenId), "ERC721: token has not been minted.");
         return bids[_tokenId].bidder;
     }
 
+    function getThresholdValue(uint _tokenId) public view returns (uint) {
+        require(_exists(_tokenId), "ERC721: token has not been minted.");
+        return threshold[_tokenId].value;
+    }
+
+    function getThresholdStatus(uint _tokenId) public view returns (bool) {
+        require(_exists(_tokenId), "ERC721: token has not been minted.");
+        return threshold[_tokenId].active;
+    }
 }
