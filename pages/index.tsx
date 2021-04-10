@@ -81,6 +81,15 @@ export default function App({abi, bytecode}: ContractProps) {
                   <p className={chainId !== 3 ? "text-red-500" : ""}>
                     Network: {chainId === 3 ? "Ropsten" : "Please switch to Ropsten"}
                   </p>
+                  {chainId === 3 
+                    ? (
+                      <Link href="https://faucet.ropsten.be/" isExternal>
+                        Get some Ropsten ether <ExternalLinkIcon mx="2px" />
+                      </Link>
+                    )
+
+                    : ('')
+                  }
                 </Stack>
               )
 
