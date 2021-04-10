@@ -4,7 +4,7 @@ import { genKeyPairFromSeed, SkynetClient } from "skynet-js";
 // Hook with default skyDB settings
 export function useDefaultSkyDB(): any {
   return useSkyDB(
-    "transactions",
+    "transaction",
     process.env.NEXT_PUBLIC_SKYDB_SEED || ""
   );
 }
@@ -43,6 +43,7 @@ export default function useSkyDB(dataKey: string, seed: string): any {
 
   // Function to get all data from skyDB as JSON (not exported)
   const getDataFromSkyDB = async () => {
+    console.log("Calling getDataFromSkyDB")
     try {
       const { data, revision } = await skyPortalRef.current.db.getJSON(
         skydbPublicKey.current,
@@ -146,7 +147,7 @@ export default function useSkyDB(dataKey: string, seed: string): any {
         ...data,
         [publicAddress]: {
           ...data[publicAddress],
-          transactions: [...logs, hash],
+          transactions: logs.includes(hash) ? [...logs] : [...logs, hash],
         },
       };
 

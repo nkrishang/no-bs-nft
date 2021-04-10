@@ -7,7 +7,8 @@ import { Web3Provider } from '@ethersproject/providers';
 import { ContentWrapper } from 'components/ContentWrapper'
 import ConnectButton from "components/ConnectButton";
 
-import { Center, SimpleGrid, Stack } from '@chakra-ui/react'
+import { Center, Link, SimpleGrid, Stack } from '@chakra-ui/react'
+import { ExternalLinkIcon } from "@chakra-ui/icons";
 import MainForm from 'components/MainForm';
 
 import { compileERC721 } from 'lib/compile';
@@ -45,7 +46,7 @@ export default function App({abi, bytecode}: ContractProps) {
         console.log(err);
       }
     }
-
+    console.log("ABI: ", abi)
     if(account) onboard(account);
   }, [account])
 
@@ -54,13 +55,16 @@ export default function App({abi, bytecode}: ContractProps) {
       <ContentWrapper>
 
         <Center className="mt-16">
-          <Stack>
+          <Stack>          
             <p className="text-8xl font-black mb-4">
               No bullshit NFT.
-            </p>
+            </p>                                      
             <p  className="text-3xl font-light">
               Mint an individual NFT or a collection without the extra platform bullshit.
             </p>
+            <Link href="https://github.com/nkrishang/no-bs-nft" isExternal>
+                Source code <ExternalLinkIcon mx="2px" />
+            </Link>
           </Stack>        
         </Center>
 
@@ -74,7 +78,9 @@ export default function App({abi, bytecode}: ContractProps) {
               ? (
                 <Stack>
                   <p>Account: {account}</p>
-                  <p>Network: {chainId}</p>
+                  <p className={chainId !== 3 ? "text-red-500" : ""}>
+                    Network: {chainId === 3 ? "Ropsten" : "Please switch to Ropsten"}
+                  </p>
                 </Stack>
               )
 

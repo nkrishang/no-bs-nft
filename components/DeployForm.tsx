@@ -40,9 +40,10 @@ export default function DeployForm({abi, bytecode, logTransaction, setContractAd
 
     try {
       const {tx, address}: any = await deployERC721(abi, bytecode, name, symbol, library.getSigner(account))
+      console.log("Setting address: ", address);
       setContractAddress(address)
       await logTransaction(tx.hash)
-      setLoadingText("Verifying on Etherscan")
+      setLoadingText("Verifying on Etherscan (est. 30s)")
 
       await fetch("/api/verify", {
         method: "POST",

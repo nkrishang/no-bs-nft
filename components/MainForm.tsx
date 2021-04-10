@@ -38,10 +38,14 @@ export default function MainForm({abi, bytecode}: MainFormProps): JSX.Element {
   useEffect(() => {
     const getTxs = async () => {
       const data = await getDataFromSkyDB();
-      setTransactions([...transactions, ...data[account as string].transactions])
+      if(data && data[account as string].transactions) setTransactions([...transactions, ...data[account as string].transactions])
     }
 
-    if(account) getTxs();
+    if(account) {
+      getTxs()
+    } else {
+      setTransactions([]);
+    }
   }, [account])
 
   const logNewTransaction = async (txHash: string) => {
@@ -49,8 +53,8 @@ export default function MainForm({abi, bytecode}: MainFormProps): JSX.Element {
     await logTransaction(account, txHash);
   }
 
-  const handleTokenUpload = async () => {
-    const tx = await uploadToken(account as string, abi);
+  const handleTokenUpload = async (to: string, skylink: string) => {
+    const tx = await uploadToken(to, skylink);
     await logNewTransaction(tx.hash);
   }
 
@@ -74,8 +78,8 @@ export default function MainForm({abi, bytecode}: MainFormProps): JSX.Element {
           <TabPanel>
             <UploadForm 
               uploadToken={handleTokenUpload} 
-              logTransaction={logNewTransaction}
               contractAddress={contractAddress}
+              setContractAddress={setContractAddress}
             />
           </TabPanel>
         </TabPanels>

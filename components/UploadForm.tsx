@@ -11,39 +11,49 @@ import {
   Spinner,
   Text,
   SimpleGrid,
-  Link
+  useToast
 } from '@chakra-ui/react';
 import { useDropzone } from "react-dropzone";
 import { parseSkylink, SkynetClient } from "skynet-js";
+import ethereum_address from 'ethereum-address';
+import { useWeb3React } from '@web3-react/core'
+import { Web3Provider } from '@ethersproject/providers'
 
 import { ContentWrapper } from './ContentWrapper';
 
 
 type UploadFormProps = {
   uploadToken: any;
-  logTransaction: any;
+  
   contractAddress: string;
+  setContractAddress: any;
 }
 
-export default function UploadForm({uploadToken, logTransaction, contractAddress}: UploadFormProps): JSX.Element {
+export default function UploadForm({
+  uploadToken, 
+  contractAddress, 
+  setContractAddress
+}: UploadFormProps): JSX.Element {
+
+  const context = useWeb3React<Web3Provider>()
+  const { account } = context
 
   const skyPortalRef = useRef<any>();
 
   const [skylinkLoading, setSkylinkLoading] = useState<boolean>(false);
   const [txLoading, setTxLoading] = useState<boolean>(false);
+  const [txLoadingText, setTxLoadingText] = useState<string>('');
 
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [imageSrc, setImageSrc] = useState<string>('');
 
-  const [address, setAddress] = useState<string>('');
-
+  const toast = useToast();
+  
   /// Set skynet portal
   useEffect(() => {
     const portal = "https://siasky.net/";
     skyPortalRef.current = new SkynetClient(portal);
-
-    setAddress(contractAddress);
   }, []);
 
   /// Uploads metadata json to skynet
@@ -90,85 +100,78 @@ export default function UploadForm({uploadToken, logTransaction, contractAddress
     setSkylinkLoading(false);
   }, []);
 
+
   const handleAddressInput = (addr: string) => {
-    setAddress(addr);
+    setContractAddress(addr)
   }
 
   const handleMomentUpload = async () => {
+    setTxLoadingText('Uploading to decentralised storage')
     setTxLoading(true);
 
-    const metadataSkylink = await uploadMetadataToSkynet(imageSrc);
-    console.log("Uploaded: ", metadataSkylink);
+    try {
+      const metadataSkylink = await uploadMetadataToSkynet(imageSrc);
+      console.log("Uploaded: ", metadataSkylink);
+      setTxLoadingText('Minting');
+      /// `uploadTokens` accepts an array of skylinks, even though we're uploading one at a time.
+      const tx = await uploadToken(account, metadataSkylink as string);
+      console.log(tx);
+      toast({
+        title: "Your collection has been deployed! Scroll down for a link to the transaction.",
+        status: "success",
+        variant: "subtle",
+        duration: 10000,
+        isClosable: true,
+      });
 
-    /// `uploadTokens` accepts an array of skylinks, even though we're uploading one at a time.
-    const tx = await uploadToken(metadataSkylink as string);
-    await logTransaction(tx.hash);
+      setName("");
+      setDescription("");
+      setImageSrc("");
+    } catch(err) {
 
-    setName("");
-    setDescription("");
-    setImageSrc("");
+      toast({
+        title: "Sorry, something went wrong. Please try again",
+        status: "error",
+        variant: "subtle",
+        duration: 10000,
+        isClosable: true,
+      });
+      console.log(err)
+    }
+
     setTxLoading(false);
+    setTxLoadingText('');
   };
-
-
+  
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   return (
     <>
       <ContentWrapper>
+
+        <Center mt="16px">
+          <>
+            <label htmlFor="contract-address" className="mr-4">Contract:</label>
+            <Input 
+              value={contractAddress}
+              isInvalid={!(contractAddress == '') && !ethereum_address.isAddress(contractAddress)}
+              errorBorderColor="crimson"
+              borderColor={ethereum_address.isAddress(contractAddress) ? "green.300" : ""}
+              width="320px" 
+              id="contract-address"
+              onChange={(e) => handleAddressInput(e.target.value)}
+              placeholder={"Enter ERC721 contract address"}
+            />
+          </>
+        </Center>
         <Center className="mt-8">
 
           <SimpleGrid columns={2} spacingX={"100px"}>
 
             <Stack>
 
-              {address
-                ? (
-                  <SimpleGrid rows={2} spacingY="2px">
-                    <SimpleGrid columns={2} spacingX="4px">
-                      <p>Contract:</p>
-                      <Link 
-                        isExternal
-                        href={`https://ropsten.etherscan.io/address/${contractAddress}`}
-                        mx="8px"
-                      >
-                        {contractAddress}
-                      </Link>
-                    </SimpleGrid>
-                    <Button variant="link" onClick={() => handleAddressInput('')}>
-                      Change address
-                    </Button>
-                  </SimpleGrid>
-                )
-
-                : (
-                  <SimpleGrid rows={2} spacingY="2px">
-                    <SimpleGrid columns={2} spacingX="4px">
-                      <p>Contract:</p>
-                      <Input 
-                        value={address} 
-                        onChange={(e) => setAddress(e.target.value)}
-                        placeholder={"Enter ERC721 contract address"}
-                      />
-                    </SimpleGrid>
-                    {contractAddress
-                      ? (
-                        <Button 
-                          variant="link" onClick={() => handleAddressInput(contractAddress)}>
-                          {"Switch to the collection just deployed."}
-                        </Button>
-                      )
-
-                      : (
-                        ''
-                      )
-                    }                    
-                  </SimpleGrid>
-                )
-              }
-
               <Flex
-                mt="32px"
+                // mt="32px"
                 mb="8px"
                 bg="transparent"
                 borderRadius="12px"
@@ -195,12 +198,22 @@ export default function UploadForm({uploadToken, logTransaction, contractAddress
               
 
               <label htmlFor="collection-name">Name</label>
-              <Input id="collection-name" placeholder="E.g. 'Zombie Punk'"/>
+              <Input 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                id="collection-name" 
+                placeholder="E.g. 'Zombie Punk'"
+              />
 
               <label htmlFor="collection-name">Description</label>
-              <Textarea id="collection-symbol" placeholder="E.g. Dylan Field sold the zobie punk for millions."/>
+              <Textarea 
+                value={description}
+                onChange={(e) => setDescription(e.target.value)} 
+                id="collection-symbol" 
+                placeholder="E.g. Dylan Field sold the zobie punk for millions."
+              />
 
-              <Button onClick={handleMomentUpload} isLoading={txLoading}>
+              <Button onClick={handleMomentUpload} isLoading={txLoading} loadingText={txLoadingText}>
                 Mint
               </Button>
             </Stack>  
@@ -222,9 +235,10 @@ export default function UploadForm({uploadToken, logTransaction, contractAddress
                   justify="center"
                   direction="column"
                 >
-                  <Text variant="label" color="#333">
-                    {skylinkLoading ? <Spinner /> : "Image preview"}
-                  </Text>
+                  {skylinkLoading
+                    ? <Spinner />
+                    : <Text variant="label" color="#333">Image preview</Text>
+                  }
                 </Flex>
               )}
           </SimpleGrid>  
