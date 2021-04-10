@@ -86,7 +86,7 @@ export default function ConnectButton(): JSX.Element {
         variant="outline"
         isLoading={activating}
         onClick={!connected || error ? handleConnect : handleDisconnect }
-        
+        width="200px"
         border="2px"
         borderColor="black"
       > 
