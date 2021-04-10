@@ -13,6 +13,8 @@ export default function useContractCalls(addr: string, abi: any) {
   const contract = useRef<any>();
 
   useEffect(() => {
+    
+    if(!addr) return;
 
     const provider = new ethers.providers.JsonRpcProvider(
       `https://eth-ropsten.alchemyapi.io/v2/${process.env.NEXT_PUBLIC_ALCHEMY_ROPSTEN_KEY}`,
@@ -23,19 +25,19 @@ export default function useContractCalls(addr: string, abi: any) {
   }, [])
 
   /// Uploads all URIs in skylinks[] as moments. Returns transaction object.
-  async function uploadMoment(skylink: string) {
+  async function uploadToken(to: string, skylink: string) {
     if (!library) return;
-    console.log("Calling uploadMoments with address: ", account);
+    console.log("Calling uploadTokens with address: ", account);
 
     try {
       const tx = await contract.current
         .connect(library.getSigner(account as string))
-        .uploadToken(skylink, { gasLimit: 1000000 });
+        .mint( account, skylink, { gasLimit: 1000000 });
 
       console.log("address:", account, "tx:", tx.hash);
       await tx.wait();
 
-      await logTransaction(account, tx.hash);      
+      await logTransaction(to, tx.hash);      
 
       return tx;
     } catch (err) {
@@ -44,7 +46,7 @@ export default function useContractCalls(addr: string, abi: any) {
   }
 
   return {
-    uploadMoment
+    uploadToken
   };
 }
 

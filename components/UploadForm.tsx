@@ -10,7 +10,8 @@ import {
   Image,
   Spinner,
   Text,
-  SimpleGrid
+  SimpleGrid,
+  Link
 } from '@chakra-ui/react';
 import { useDropzone } from "react-dropzone";
 import { parseSkylink, SkynetClient } from "skynet-js";
@@ -19,10 +20,12 @@ import { ContentWrapper } from './ContentWrapper';
 
 
 type UploadFormProps = {
-  uploadMoment: any
+  uploadToken: any;
+  logTransaction: any;
+  contractAddress: string;
 }
 
-export default function UploadForm({uploadMoment}: UploadFormProps): JSX.Element {
+export default function UploadForm({uploadToken, logTransaction, contractAddress}: UploadFormProps): JSX.Element {
 
   const skyPortalRef = useRef<any>();
 
@@ -33,12 +36,14 @@ export default function UploadForm({uploadMoment}: UploadFormProps): JSX.Element
   const [description, setDescription] = useState<string>("");
   const [imageSrc, setImageSrc] = useState<string>('');
 
-  const [transactions, setTransactions] = useState<string[]>([]);
+  const [address, setAddress] = useState<string>('');
 
   /// Set skynet portal
   useEffect(() => {
     const portal = "https://siasky.net/";
     skyPortalRef.current = new SkynetClient(portal);
+
+    setAddress(contractAddress);
   }, []);
 
   /// Uploads metadata json to skynet
@@ -85,15 +90,19 @@ export default function UploadForm({uploadMoment}: UploadFormProps): JSX.Element
     setSkylinkLoading(false);
   }, []);
 
+  const handleAddressInput = (addr: string) => {
+    setAddress(addr);
+  }
+
   const handleMomentUpload = async () => {
     setTxLoading(true);
 
     const metadataSkylink = await uploadMetadataToSkynet(imageSrc);
     console.log("Uploaded: ", metadataSkylink);
 
-    /// `uploadMoments` accepts an array of skylinks, even though we're uploading one at a time.
-    const tx = await uploadMoment([metadataSkylink as string]);
-    setTransactions([...transactions, tx]);
+    /// `uploadTokens` accepts an array of skylinks, even though we're uploading one at a time.
+    const tx = await uploadToken(metadataSkylink as string);
+    await logTransaction(tx.hash);
 
     setName("");
     setDescription("");
@@ -112,6 +121,52 @@ export default function UploadForm({uploadMoment}: UploadFormProps): JSX.Element
           <SimpleGrid columns={2} spacingX={"100px"}>
 
             <Stack>
+
+              {address
+                ? (
+                  <SimpleGrid rows={2} spacingY="2px">
+                    <SimpleGrid columns={2} spacingX="4px">
+                      <p>Contract:</p>
+                      <Link 
+                        isExternal
+                        href={`https://ropsten.etherscan.io/address/${contractAddress}`}
+                        mx="8px"
+                      >
+                        {contractAddress}
+                      </Link>
+                    </SimpleGrid>
+                    <Button variant="link" onClick={() => handleAddressInput('')}>
+                      Change address
+                    </Button>
+                  </SimpleGrid>
+                )
+
+                : (
+                  <SimpleGrid rows={2} spacingY="2px">
+                    <SimpleGrid columns={2} spacingX="4px">
+                      <p>Contract:</p>
+                      <Input 
+                        value={address} 
+                        onChange={(e) => setAddress(e.target.value)}
+                        placeholder={"Enter ERC721 contract address"}
+                      />
+                    </SimpleGrid>
+                    {contractAddress
+                      ? (
+                        <Button 
+                          variant="link" onClick={() => handleAddressInput(contractAddress)}>
+                          {"Switch to the collection just deployed."}
+                        </Button>
+                      )
+
+                      : (
+                        ''
+                      )
+                    }                    
+                  </SimpleGrid>
+                )
+              }
+
               <Flex
                 mt="32px"
                 mb="8px"

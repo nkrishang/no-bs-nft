@@ -1,66 +1,111 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-  Button,
   Stack,
-  Center,
-  Input,
   Tabs,
   TabList,
   TabPanels,
   Tab,
   TabPanel,
-  Textarea,
-  Flex,
-  Image,
-  Spinner,
-  Text
+  Link
 } from '@chakra-ui/react';
 
-import { ContentWrapper } from './ContentWrapper';
+import { useWeb3React } from '@web3-react/core'
+import { Web3Provider } from '@ethersproject/providers'
+
 import UploadForm from './UploadForm';
+import DeployForm from './DeployForm';
 
-function DeployForm(): JSX.Element {
+import { useDefaultSkyDB } from "lib/useSkyDB";
+import useContractCalls from 'lib/useContractCalls';
 
-  return (
-    <>
-      <ContentWrapper>
-        <Center className="mt-8">
-          <Stack>
-
-            <label htmlFor="collection-name">Collection name</label>
-            <Input id="collection-name" placeholder="E.g. 'Crypto punks'"/>
-
-            <label htmlFor="collection-name">Collection symbol</label>
-            <Input id="collection-symbol" placeholder="E.g. 'PUNKS'"/>
-
-            <Button>
-              Create collection
-            </Button>
-          </Stack>    
-        </Center>
-      </ContentWrapper>
-    </>
-  )
+type MainFormProps = {
+  abi: any;
+  bytecode: any;
 }
 
-export default function MainForm(): JSX.Element {
+export default function MainForm({abi, bytecode}: MainFormProps): JSX.Element {
+
+  const context = useWeb3React<Web3Provider>()
+  const { account } = context
+
+  const { logTransaction, getDataFromSkyDB } = useDefaultSkyDB();
+  const [transactions, setTransactions] = useState<string[]>([]);
+  const [contractAddress, setContractAddress] = useState<string>('');
+
+  const { uploadToken } = useContractCalls(contractAddress, abi)
+
+  useEffect(() => {
+    const getTxs = async () => {
+      const data = await getDataFromSkyDB();
+      setTransactions([...transactions, ...data[account as string].transactions])
+    }
+
+    if(account) getTxs();
+  }, [account])
+
+  const logNewTransaction = async (txHash: string) => {
+    setTransactions([...transactions, txHash]);
+    await logTransaction(account, txHash);
+  }
+
+  const handleTokenUpload = async () => {
+    const tx = await uploadToken(account as string, abi);
+    await logNewTransaction(tx.hash);
+  }
 
   return (
-    <Tabs isFitted variant="enclosed" width="900px" mb="40px">
-      <TabList>
-        <Tab> Deploy your NFT collection</Tab>
-        <Tab>Upload media to your collection</Tab>
-      </TabList>
+    <Stack direction="column" mb="20px">
+      <Tabs isFitted variant="enclosed" width="900px" mb="20px">
+        <TabList>
+          <Tab> Deploy your NFT collection</Tab>
+          <Tab>Upload media to your collection</Tab>
+        </TabList>
 
-      <TabPanels>
-        <TabPanel>
-          <DeployForm />
-        </TabPanel>
-        <TabPanel>
-          <UploadForm uploadMoment={() => {}}/>
-        </TabPanel>
-      </TabPanels>
-    </Tabs>
+        <TabPanels>
+          <TabPanel>
+            <DeployForm 
+              abi={abi}  
+              bytecode={bytecode} 
+              logTransaction={logNewTransaction} 
+              setContractAddress={setContractAddress}
+            />
+          </TabPanel>
+          <TabPanel>
+            <UploadForm 
+              uploadToken={handleTokenUpload} 
+              logTransaction={logNewTransaction}
+              contractAddress={contractAddress}
+            />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+
+      {transactions.length
+
+        ? (
+          <Stack mb="16px">
+            <p className="text-2xl font-bold">Your transactions</p>
+
+            {transactions.map(txhash => {
+              return (
+                <Link 
+                  key={txhash}
+                  isExternal
+                  href={`https://ropsten.etherscan.io/tx/${txhash}`}
+                  mx="8px"
+                >
+                  {txhash}
+                </Link>
+              )
+            })}
+          </Stack>
+        )
+
+        : (
+          ''
+        )
+      }
+    </Stack>
   )
 }

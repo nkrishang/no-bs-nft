@@ -4,8 +4,8 @@ import { genKeyPairFromSeed, SkynetClient } from "skynet-js";
 // Hook with default skyDB settings
 export function useDefaultSkyDB(): any {
   return useSkyDB(
-    "user-info",
-    process.env.NEXT_PUBLIC_ALCHEMY_ROPSTEN_KEY || ""
+    "transactions",
+    process.env.NEXT_PUBLIC_SKYDB_SEED || ""
   );
 }
 
@@ -93,7 +93,7 @@ export default function useSkyDB(dataKey: string, seed: string): any {
   };
 
   // Onboard a user to the database
-  const onboardUser = async (publicAddress: string, username: string) => {
+  const onboardUser = async (publicAddress: string) => {
     const data = await getDataFromSkyDB();
 
     // If the public address isn't already in the database, onboard them
@@ -101,7 +101,7 @@ export default function useSkyDB(dataKey: string, seed: string): any {
       const document = {
         ...data,
         [publicAddress]: {
-          username: username,
+          transactions: [],
         },
       };
 
@@ -139,14 +139,14 @@ export default function useSkyDB(dataKey: string, seed: string): any {
     const data = await getDataFromSkyDB();
 
     if (data && data[publicAddress]) {
-      const field = data[publicAddress].transaction;
+      const field = data[publicAddress].transactions;
       const logs = field && field.length ? field : [];
 
       const document = {
         ...data,
         [publicAddress]: {
           ...data[publicAddress],
-          transaction: [...logs, hash],
+          transactions: [...logs, hash],
         },
       };
 
