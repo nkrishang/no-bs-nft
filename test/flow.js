@@ -8,6 +8,7 @@ describe("Should deploy contract and upload URI at the right places", () => {
     let otherCollector;
 
     let contract;
+    let bidExecutor;
 
     const name = "name";
     const symbol = "SYMBOL";
@@ -21,8 +22,13 @@ describe("Should deploy contract and upload URI at the right places", () => {
 
         [owner, collector, otherCollector] = await ethers.getSigners();
 
+        const BE_contractFactory = await ethers.getContractFactory("BidExecutor");
+        bidExecutor = await BE_contractFactory.deploy();
+
         const contractFactory = await ethers.getContractFactory("NFT");
-        contract = await contractFactory.deploy(name, symbol);
+        contract = await contractFactory.deploy(name, symbol, bidExecutor.address);
+
+        bidExecutor.setNftFactory(contract.address);
     })
 
     it("Should print the contract address", () => {
@@ -115,6 +121,22 @@ describe("Should deploy contract and upload URI at the right places", () => {
         await contract.connect(otherCollector).makeBid(id, otherCollectorBid, { value: otherCollectorBid });
 
         const otherCollectorBalBeforeSale = await otherCollector.getBalance();
-        
+        const ownerBalBeforeSale = await owner.getBalance();
+
+        await contract.connect(collector).makeBid(id, ownerThreshold, { value: ownerThreshold });
+
+        const otherCollectorBalAfterSale = await otherCollector.getBalance();
+        const ownerBalAfterSale = await owner.getBalance();
+        const newOwner = await contract.ownerOf(id);
+
+        expect(
+            parseFloat(ethers.utils.formatUnits(otherCollectorBalAfterSale)) - parseFloat(ethers.utils.formatUnits(otherCollectorBalBeforeSale)) 
+        ).to.be.gt(1.49); // Stupid javascript math
+
+        expect(
+            parseFloat(ethers.utils.formatUnits(ownerBalAfterSale)) - parseFloat(ethers.utils.formatUnits(ownerBalBeforeSale)) 
+        ).to.be.gt(1.99); // Stupid javascript math
+
+        expect(newOwner).to.equal(collector.address);
     })
 })
