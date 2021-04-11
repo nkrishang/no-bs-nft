@@ -6,8 +6,6 @@ pragma solidity ^0.8.0;
 import "./ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
 import "./BidExecutor.sol";
 
-import "hardhat/console.sol";
-
 contract NFT is ERC721PresetMinterPauserAutoId {
 
     uint public totalTokensMinted;
