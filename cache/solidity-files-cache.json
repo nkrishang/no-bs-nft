@@ -692,8 +692,8 @@
       ]
     },
     "C:\\Users\\krish\\OneDrive\\Desktop\\projects\\no-bs-nft\\contracts\\NFT.sol": {
-      "lastModificationDate": 1618151761736,
-      "contentHash": "3f658717a41464d346ec867015d59f8c",
+      "lastModificationDate": 1618153712834,
+      "contentHash": "d6a3b21665f154a2f3541a19d8b4d3cc",
       "sourceName": "contracts/NFT.sol",
       "solcConfig": {
         "version": "0.8.3",
