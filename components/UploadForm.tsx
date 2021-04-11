@@ -47,6 +47,7 @@ export default function UploadForm({
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [imageSrc, setImageSrc] = useState<string>('');
+  const [mediaSkylink, setMediaskylink] = useState<string>('');
 
   const toast = useToast();
   
@@ -62,7 +63,7 @@ export default function UploadForm({
       const metadata = {
         name: name,
         description: description,
-        image: `https://siasky.net/${mediaSkylink}`,
+        image: mediaSkylink,
       };
 
       const blob: BlobPart = new Blob([JSON.stringify(metadata)], {
@@ -92,6 +93,7 @@ export default function UploadForm({
     try {
       const media = await skyPortalRef.current.uploadFile(file);
       const parsedSkylink: string | null = parseSkylink(media.skylink);
+      setMediaskylink(media.skylink);
       setImageSrc(parsedSkylink as string);
     } catch (err) {
       console.log(err);
@@ -110,7 +112,7 @@ export default function UploadForm({
     setTxLoading(true);
 
     try {
-      const metadataSkylink = await uploadMetadataToSkynet(imageSrc);
+      const metadataSkylink = await uploadMetadataToSkynet(mediaSkylink);
       console.log("Uploaded: ", metadataSkylink);
       setTxLoadingText('Minting');
       /// `uploadTokens` accepts an array of skylinks, even though we're uploading one at a time.
