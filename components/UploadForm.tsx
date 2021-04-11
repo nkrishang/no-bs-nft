@@ -73,11 +73,10 @@ export default function UploadForm({
 
       try {
         const { skylink } = await skyPortalRef.current.uploadFile(metadataFile);
-        const parsedSkylink: string | null = parseSkylink(skylink);
-        console.log("Metadata Skylink: ", parsedSkylink);
+        
+        console.log("Metadata Skylink: ", skylink);
 
-        const jsonURI = `https://siasky.net/${parsedSkylink}`
-        return jsonURI;
+        return skylink;
       } catch (err) {
         console.log(err);
       }
