@@ -20,11 +20,11 @@ import { useDefaultSkyDB } from "lib/useSkyDB";
 import useContractCalls from 'lib/useContractCalls';
 
 type MainFormProps = {
-  abi: any;
-  bytecode: any;
+  NFT: {abi: any, bytecode: any};
+  BidExecutor: {abi: any, bytecode: any};
 }
 
-export default function MainForm({abi, bytecode}: MainFormProps): JSX.Element {
+export default function MainForm({NFT, BidExecutor}: MainFormProps): JSX.Element {
 
   const context = useWeb3React<Web3Provider>()
   const { account } = context
@@ -33,7 +33,7 @@ export default function MainForm({abi, bytecode}: MainFormProps): JSX.Element {
   const [transactions, setTransactions] = useState<string[]>([]);
   const [contractAddress, setContractAddress] = useState<string>('');
 
-  const { uploadToken } = useContractCalls(contractAddress, abi)
+  const { uploadToken } = useContractCalls(contractAddress, NFT.abi) // CHECK
 
   useEffect(() => {
     const getTxs = async () => {
@@ -69,8 +69,8 @@ export default function MainForm({abi, bytecode}: MainFormProps): JSX.Element {
         <TabPanels>
           <TabPanel>
             <DeployForm 
-              abi={abi}  
-              bytecode={bytecode} 
+              NFT={NFT}  
+              BidExecutor={BidExecutor} 
               logTransaction={logNewTransaction} 
               setContractAddress={setContractAddress}
             />

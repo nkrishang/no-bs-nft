@@ -15,23 +15,23 @@ import { compileERC721 } from 'lib/compile';
 import { useDefaultSkyDB } from "lib/useSkyDB";
 
 type ContractProps = {
-  abi: any;
-  bytecode: any;
+  NFT: any;
+  BidExecutor: any;
 }
 
 export const getStaticProps: GetStaticProps = async (context) => {
 
-  const {abi, bytecode} = await compileERC721();
+  const {NFT, BidExecutor} = await compileERC721();
 
   return {
     props: {
-      abi: abi,
-      bytecode: bytecode
+      NFT,
+      BidExecutor
     }
   }
 }
 
-export default function App({abi, bytecode}: ContractProps) {
+export default function App({NFT, BidExecutor}: ContractProps) {
   const context = useWeb3React<Web3Provider>()
   const { chainId, account } = context
 
@@ -46,7 +46,7 @@ export default function App({abi, bytecode}: ContractProps) {
         console.log(err);
       }
     }
-    console.log("ABI: ", abi)
+    
     if(account) onboard(account);
   }, [account])
 
@@ -99,7 +99,7 @@ export default function App({abi, bytecode}: ContractProps) {
         </Center>
 
         <Center className="mt-8">
-          <MainForm abi={abi} bytecode={bytecode} />     
+          <MainForm NFT={NFT} BidExecutor={BidExecutor} />     
         </Center>
 
       </ContentWrapper>

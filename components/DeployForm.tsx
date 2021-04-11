@@ -16,13 +16,13 @@ import { ContentWrapper } from './ContentWrapper';
 import { deployERC721 } from 'lib/deploy';
 
 type DeployFormProps = {
-  abi: any;
-  bytecode: any;
+  NFT: {abi: any, bytecode: any};
+  BidExecutor: {abi: any, bytecode: any};
   logTransaction: any;
   setContractAddress: any;
 }
 
-export default function DeployForm({abi, bytecode, logTransaction, setContractAddress}: DeployFormProps): JSX.Element {
+export default function DeployForm({NFT, BidExecutor, logTransaction, setContractAddress}: DeployFormProps): JSX.Element {
   
   const toast = useToast();
   const context = useWeb3React<Web3Provider>()
@@ -39,7 +39,7 @@ export default function DeployForm({abi, bytecode, logTransaction, setContractAd
     setLoading(true);
 
     try {
-      const {tx, address}: any = await deployERC721(abi, bytecode, name, symbol, library.getSigner(account))
+      const {tx, address}: any = await deployERC721(NFT, BidExecutor, name, symbol, library.getSigner(account))
       console.log("Setting address: ", address);
       setContractAddress(address)
       await logTransaction(tx.hash)
