@@ -216,8 +216,8 @@
       ]
     },
     "C:\\Users\\krish\\OneDrive\\Desktop\\projects\\no-bs-nft\\contracts\\ERC721\\presets\\ERC721PresetMinterPauserAutoId.sol": {
-      "lastModificationDate": 1617894324645,
-      "contentHash": "e46d8c8935e346bfd4343ee0e7e3941b",
+      "lastModificationDate": 1618151846880,
+      "contentHash": "7606dd455c8d9d7d660158fa02c738c8",
       "sourceName": "contracts/ERC721/presets/ERC721PresetMinterPauserAutoId.sol",
       "solcConfig": {
         "version": "0.8.3",
@@ -692,8 +692,8 @@
       ]
     },
     "C:\\Users\\krish\\OneDrive\\Desktop\\projects\\no-bs-nft\\contracts\\NFT.sol": {
-      "lastModificationDate": 1617897414505,
-      "contentHash": "4d9da02ac2ce49aeac0f2576e9ac6e19",
+      "lastModificationDate": 1618151761736,
+      "contentHash": "3f658717a41464d346ec867015d59f8c",
       "sourceName": "contracts/NFT.sol",
       "solcConfig": {
         "version": "0.8.3",
@@ -718,13 +718,48 @@
         }
       },
       "imports": [
-        "./ERC721/presets/ERC721PresetMinterPauserAutoId.sol"
+        "./ERC721/presets/ERC721PresetMinterPauserAutoId.sol",
+        "hardhat/console.sol"
       ],
       "versionPragmas": [
         "^0.8.0"
       ],
       "artifacts": [
         "NFT"
+      ]
+    },
+    "C:\\Users\\krish\\OneDrive\\Desktop\\projects\\no-bs-nft\\node_modules\\hardhat\\console.sol": {
+      "lastModificationDate": 1617888961122,
+      "contentHash": "cc4777addd464ea56fa35b1c45df0591",
+      "sourceName": "hardhat/console.sol",
+      "solcConfig": {
+        "version": "0.8.3",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "console"
       ]
     }
   }

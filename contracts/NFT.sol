@@ -5,6 +5,8 @@ pragma solidity ^0.8.0;
 // Base contract credit: OpenZeppelin
 import "./ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
 
+import "hardhat/console.sol";
+
 contract NFT is ERC721PresetMinterPauserAutoId {
 
     constructor(string memory name_, string memory symbol_) ERC721PresetMinterPauserAutoId(name_, symbol_, '') {}
@@ -35,6 +37,8 @@ contract NFT is ERC721PresetMinterPauserAutoId {
     /// @notice Let's address with MINTER_ROLE mint a token.
     function mint(address _to, string calldata _URI) public {
         uint tokenId = mint(_to);
+        console.log("Token ID: ", tokenId);
+        console.log("URI: ", _URI);
         URI[tokenId] = _URI;
     }
 
