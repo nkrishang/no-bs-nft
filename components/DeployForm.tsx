@@ -40,9 +40,12 @@ export default function DeployForm({NFT, BidExecutor, logTransaction, setContrac
 
     try {
       const {tx, address}: any = await deployERC721(NFT, BidExecutor, name, symbol, library.getSigner(account))
-      console.log("Setting address: ", address);
-      setContractAddress(address)
-      await logTransaction(tx.hash)
+      console.log("Setting address: ", address.nft);
+      setContractAddress(address.nft)
+
+      await logTransaction(tx.bidExecutor_deploy.hash)
+      await logTransaction(tx.nft_deploy.hash)
+  
       setLoadingText("Verifying on Etherscan (est. 30s)")
 
       await fetch("/api/verify", {
@@ -51,7 +54,8 @@ export default function DeployForm({NFT, BidExecutor, logTransaction, setContrac
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          address: address,
+          nft_address: address.nft,
+          bidExecutor_address: address.bidExecutor,
           name: name,
           symbol: symbol
         }),
