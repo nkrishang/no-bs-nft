@@ -76,7 +76,8 @@ export default function UploadForm({
         const parsedSkylink: string | null = parseSkylink(skylink);
         console.log("Metadata Skylink: ", parsedSkylink);
 
-        return parsedSkylink;
+        const jsonURI = `https://siasky.net/${parsedSkylink}`
+        return jsonURI;
       } catch (err) {
         console.log(err);
       }
