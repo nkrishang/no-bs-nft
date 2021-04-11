@@ -11,6 +11,8 @@ contract NFT is ERC721PresetMinterPauserAutoId {
 
     constructor(string memory name_, string memory symbol_) ERC721PresetMinterPauserAutoId(name_, symbol_, '') {}
 
+    uint totalTokensMinted;
+
     struct Bid {
         address bidder;
         uint bidValue;
@@ -37,8 +39,7 @@ contract NFT is ERC721PresetMinterPauserAutoId {
     /// @notice Let's address with MINTER_ROLE mint a token.
     function mint(address _to, string calldata _URI) public {
         uint tokenId = mint(_to);
-        console.log("Token ID: ", tokenId);
-        console.log("URI: ", _URI);
+        totalTokensMinted = tokenId;
         URI[tokenId] = _URI;
     }
 
