@@ -53,7 +53,7 @@ export default function Account(): JSX.Element {
       height="280px"
       width="240px"
       overflowX="hidden"
-      // bg="white"
+      bg="white"
       borderRadius="12px"
       zIndex="100"
       boxShadow="4px 4px 10px rgba(0, 0, 0, 0.25)"
