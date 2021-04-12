@@ -20,6 +20,7 @@ import { useWeb3React } from '@web3-react/core'
 import { Web3Provider } from '@ethersproject/providers'
 
 import { ContentWrapper } from './ContentWrapper';
+import { ContentRenderer } from "./ContentRenderer"; 
 
 
 type UploadFormProps = {
@@ -47,6 +48,8 @@ export default function UploadForm({
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [imageSrc, setImageSrc] = useState<string>('');
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+
   const [mediaSkylink, setMediaskylink] = useState<string>('');
 
   const toast = useToast();
@@ -89,7 +92,7 @@ export default function UploadForm({
     setSkylinkLoading(true);
 
     const [file] = acceptedFiles;
-
+    setMediaFile(file);
     try {
       const media = await skyPortalRef.current.uploadFile(file);
       const parsedSkylink: string | null = parseSkylink(media.skylink);
@@ -220,11 +223,9 @@ export default function UploadForm({
               </Button>
             </Stack>  
             {imageSrc ? (
-                <Image               
-                  borderRadius="12px"
-                  height="300px"
-                  width="320px"
+                <ContentRenderer                                
                   src={`https://siasky.net/${imageSrc}`}
+                  file={mediaFile}
                 />
               ) : (
                 <Flex              

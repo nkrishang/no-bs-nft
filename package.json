@@ -17,6 +17,7 @@
     "@nomiclabs/hardhat-etherscan": "^2.1.1",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@openzeppelin/contracts": "^4.0.0",
+    "@types/react-pdf": "^5.0.2",
     "@types/shelljs": "^0.8.8",
     "@web3-react/core": "^6.1.9",
     "@web3-react/injected-connector": "^6.0.7",
@@ -30,6 +31,7 @@
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-dropzone": "^11.3.2",
+    "react-pdf": "^5.2.0",
     "shelljs": "^0.8.4",
     "skynet-js": "^3.0.2",
     "solc": "^0.8.3"
