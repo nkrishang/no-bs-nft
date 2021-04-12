@@ -9,7 +9,11 @@ import {
   Flex 
 } from "@chakra-ui/react";
 import React, { useState, useEffect } from "react";
-// import { Document, Page } from 'react-pdf';
+import dynamic from "next/dynamic";
+
+const PDFViewer = dynamic(() => import("components/PDFViewer"), {
+  ssr: false
+});
 
 interface ResponseBlob {
   src: string;
@@ -21,7 +25,7 @@ interface ContentRendererProps {
   file: File | null
 }
 
-const renderContent = (rb: ResponseBlob, file: File | null = null) => {
+const renderContent = (rb: ResponseBlob, file: File | null) => {
   const { src, skynetMetadata } = rb;
 
   // console.log(skynetMetadata);
@@ -50,12 +54,21 @@ const renderContent = (rb: ResponseBlob, file: File | null = null) => {
     );
   } else if (type.indexOf("pdf")) {
       return (
-        // <Document file={file}>
-        //   <Page />
-        // </Document>
-        <Text>
-          PDF file to be rendered here.
-        </Text>
+        // <Text>
+        //   PDF file to be rendered here.
+        // </Text>
+        <Flex              
+          height="300px"
+          width="320px"
+          bg="transparent"
+          borderRadius="12px"
+          border="2px dashed #333"
+          align="center"
+          justify="center"
+          direction="column"
+        >
+          <PDFViewer file={file}/>
+        </Flex>
       )
   }
   return <Text>Unsupported file format</Text>;
@@ -67,6 +80,9 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ src, file=null
   useEffect(() => {
     const asyncFn = async () => {
       const response = await fetch(src);
+      if(response) {
+        console.log("Yup, there is response.");
+      }
       if (response.ok) {
         const skynetMetadata = JSON.parse(
           response.headers.get("skynet-file-metadata") || "{}"
@@ -92,7 +108,7 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ src, file=null
   return (
     <Box>
       {response ? (
-        renderContent(response)
+        renderContent(response, file)
       ) : (
         <Flex              
           height="300px"
