@@ -1,13 +1,24 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { GetStaticProps } from 'next'
 
+import { ethers } from 'ethers'
 import { useWeb3React } from '@web3-react/core';
 import { Web3Provider } from '@ethersproject/providers';
 
 import { ContentWrapper } from 'components/ContentWrapper'
 import ConnectButton from "components/ConnectButton";
+import Account from "components/Account";
 
-import { Center, Link, SimpleGrid, Stack } from '@chakra-ui/react'
+import {
+  Center, 
+  Link, 
+  SimpleGrid, 
+  Stack,
+  Tooltip,
+  useClipboard,
+  Text,
+  Flex 
+} from '@chakra-ui/react'
 import { ExternalLinkIcon } from "@chakra-ui/icons";
 import MainForm from 'components/MainForm';
 
@@ -33,9 +44,11 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
 export default function App({NFT, BidExecutor}: ContractProps) {
   const context = useWeb3React<Web3Provider>()
-  const { chainId, account } = context
+  const { chainId, account, library } = context
 
   const { onboardUser } = useDefaultSkyDB();
+
+  
 
   useEffect(() => {
     
@@ -68,35 +81,9 @@ export default function App({NFT, BidExecutor}: ContractProps) {
           </Stack>        
         </Center>
 
-        <Center mt="40px">
-          <SimpleGrid rows={2} spacingY="24px">
-            <SimpleGrid columns={2} spacingX={"40px"}>
-              <p className="text-xl">{"Start minting. It's simple."}</p>
-              <ConnectButton />
-            </SimpleGrid>
-            {account
-              ? (
-                <Stack>
-                  <p>Account: {account}</p>
-                  <p className={chainId !== 3 ? "text-red-500" : ""}>
-                    Network: {chainId === 3 ? "Ropsten" : "Please switch to Ropsten"}
-                  </p>
-                  {chainId === 3 
-                    ? (
-                      <Link href="https://faucet.ropsten.be/" isExternal>
-                        Get some Ropsten ether <ExternalLinkIcon mx="2px" />
-                      </Link>
-                    )
-
-                    : ('')
-                  }
-                </Stack>
-              )
-
-              : <></>
-            } 
-          </SimpleGrid> 
-        </Center>
+        {/* <Center mt="40px">
+          <Account />
+        </Center> */}
 
         <Center className="mt-8">
           <MainForm NFT={NFT} BidExecutor={BidExecutor} />     

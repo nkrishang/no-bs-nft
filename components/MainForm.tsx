@@ -38,7 +38,12 @@ export default function MainForm({NFT, BidExecutor}: MainFormProps): JSX.Element
   useEffect(() => {
     const getTxs = async () => {
       const data = await getDataFromSkyDB();
-      if(data && data[account as string].transactions) setTransactions([...transactions, ...data[account as string].transactions])
+      if(data) {
+        if (data[account as string]) {
+          
+          if(data[account as string].transactions) setTransactions([...transactions, ...data[account as string].transactions]);
+        }
+      }
     }
 
     if(account) {
