@@ -89,6 +89,7 @@ export default function UploadForm({
   );
 
   const onDrop = useCallback(async (acceptedFiles) => {
+    setImageSrc('');
     setSkylinkLoading(true);
 
     const [file] = acceptedFiles;
@@ -239,8 +240,19 @@ export default function UploadForm({
                   direction="column"
                 >
                   {skylinkLoading
-                    ? <Spinner />
-                    : <Text variant="label" color="#333">Image preview</Text>
+                    ? (
+                      <Stack>
+                        <Center>
+                          <p className="text-gray-400">
+                            Uploading to decentralized storage
+                          </p>
+                        </Center>
+                        <Center>
+                          <Spinner />
+                        </Center>                                                
+                      </Stack>                      
+                      )
+                    : <Text variant="label" color="#333">Media preview</Text>
                   }
                 </Flex>
               )}

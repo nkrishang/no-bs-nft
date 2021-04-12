@@ -1,4 +1,13 @@
-import { Box, Image, Text, Spinner, AspectRatio } from "@chakra-ui/react";
+import { 
+  Box,
+  Image, 
+  Text, 
+  Spinner, 
+  AspectRatio,
+  Center,
+  Stack,
+  Flex 
+} from "@chakra-ui/react";
 import React, { useState, useEffect } from "react";
 // import { Document, Page } from 'react-pdf';
 
@@ -85,7 +94,27 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ src, file=null
       {response ? (
         renderContent(response)
       ) : (
-        <Text>Woops</Text>
+        <Flex              
+          height="300px"
+          width="320px"
+          bg="transparent"
+          borderRadius="12px"
+          border="2px dashed #333"
+          align="center"
+          justify="center"
+          direction="column"
+        >
+          <Stack>
+            <Center>
+                <p className="text-gray-400">
+                  Rendering content
+                </p>
+            </Center>
+            <Center>
+              <Spinner />
+            </Center>                                                
+          </Stack>
+        </Flex>
       )}
     </Box>
   );
