@@ -101,7 +101,7 @@ export default function Account(): JSX.Element {
                         </Badge>
                       )
                     : (
-                      <p className={account ? "text-red-500 py-4" : ""}>
+                      <p className={account ? "text-red-500" : ""}>
                         {account ? "Please switch to Ropsten" : "Network: -"}
                       </p>
                     )
