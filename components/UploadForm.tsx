@@ -216,7 +216,7 @@ export default function UploadForm({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)} 
                 id="collection-symbol" 
-                placeholder="E.g. Dylan Field sold the zobie punk for millions."
+                placeholder="E.g. Dylan Field sold the zombie punk for millions."
               />
 
               <Button onClick={handleMomentUpload} isLoading={txLoading} loadingText={txLoadingText}>
