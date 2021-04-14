@@ -18,7 +18,7 @@ export default function useContractCalls(addr: string, abi: any) {
     if(!addr || !ethereum_address.isAddress(addr)) return;
 
     const provider = new ethers.providers.JsonRpcProvider(
-      `https://eth-ropsten.alchemyapi.io/v2/${process.env.NEXT_PUBLIC_ALCHEMY_ROPSTEN_KEY}`,
+      `https://eth-ropsten.alchemyapi.io/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`,
       "ropsten"
     );
     console.log("Contract addr: ", addr);
