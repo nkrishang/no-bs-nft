@@ -1,10 +1,12 @@
 import 'tailwindcss/tailwind.css'
 
 import { AppProps } from "next/app";
+
 import { Web3Provider } from "@ethersproject/providers";
+import { ChakraProvider } from "@chakra-ui/react"
+
 import { Web3ReactProvider } from "@web3-react/core";
 import { Web3EagerConnector } from "components/Web3EagerConnector";
-import { ChakraProvider } from "@chakra-ui/react"
 
 import React from "react";
 import { MetaData } from "components/MetaData";
@@ -20,7 +22,9 @@ function App({ Component, pageProps }: AppProps): JSX.Element {
   return (
     <>
       <MetaData />
-      <Web3ReactProvider getLibrary={getLibrary}>  
+      <Web3ReactProvider 
+        getLibrary={getLibrary}
+      >  
         <ChakraProvider>          
           <Web3EagerConnector />
           <Account />

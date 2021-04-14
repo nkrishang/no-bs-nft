@@ -15,8 +15,20 @@ const ROPSTEN_PRIVATE_KEY = process.env.ROPSTEN_PRIVATE_KEY;
 module.exports = {
   solidity: "0.8.3",
   networks: {
+    mainnet: {
+      url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
+      accounts: [`${ROPSTEN_PRIVATE_KEY}`]
+    },
     ropsten: {
       url: `https://eth-ropsten.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
+      accounts: [`${ROPSTEN_PRIVATE_KEY}`]
+    },
+    mumbai: {
+      url: "https://rpc-mumbai.maticvigil.com",
+      accounts: [`${ROPSTEN_PRIVATE_KEY}`]
+    },
+    matic: {
+      url: "https://rpc-mainnet.maticvigil.com/",
       accounts: [`${ROPSTEN_PRIVATE_KEY}`]
     }
   },
