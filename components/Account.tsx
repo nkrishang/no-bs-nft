@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
-import { GetStaticProps } from 'next'
 
 import { ethers } from 'ethers'
 import { useWeb3React } from '@web3-react/core';
 import { Web3Provider } from '@ethersproject/providers';
 
-import { ContentWrapper } from 'components/ContentWrapper'
 import ConnectButton from "components/ConnectButton";
 
 import {
@@ -21,10 +19,8 @@ import {
   Box 
 } from '@chakra-ui/react'
 import { ExternalLinkIcon } from "@chakra-ui/icons";
-import MainForm from 'components/MainForm';
 
-import { compileERC721 } from 'lib/compile';
-import { useDefaultSkyDB } from "lib/useSkyDB";
+import { supportedIds } from "lib/supportedIds";
 
 export default function Account(): JSX.Element {
 
@@ -86,7 +82,10 @@ export default function Account(): JSX.Element {
                     Account
                   </Text>
                   <Text color="#999">
-                    {account ? (account as string).slice(0,6) + "..." + (account as string).slice((account as string).length - 3, (account as string).length) : "-"}
+                    {account 
+                      ? (account as string).slice(0,6) + "..." + (account as string).slice(-3)                         
+                      : "-"
+                    }
                   </Text>
                 </Flex>
               </Tooltip>
@@ -94,10 +93,10 @@ export default function Account(): JSX.Element {
             <Stack mb="8px"> 
               <Center>
                 <Box>                                           
-                  {chainId === 3
+                  {supportedIds.ids.includes(chainId as number)
                     ? (
-                        <Badge colorScheme="green" fontSize="0.8em" py="4px">
-                          Ropsten
+                        <Badge colorScheme="green" fontSize="1em" py="4px">
+                          {supportedIds[`${chainId as number}`]}
                         </Badge>
                       )
                     : (
@@ -111,7 +110,7 @@ export default function Account(): JSX.Element {
               <Center>
                 <Stack>
                   <Center>
-                    <p>Balance: {account ? ethBal.slice(0,5) + " ETH" : " -" }</p>
+                    <p>Balance: {account ? ethBal.slice(0,5) + (chainId == 80001 || chainId == 137 ? " MATIC" : " ETH") : " -" }</p>
                   </Center>
                   <Link href="https://faucet.ropsten.be/" isExternal>
                     Get some Ropsten ether <ExternalLinkIcon mx="2px" />

@@ -1,26 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { GetStaticProps } from 'next'
 
-import { ethers } from 'ethers'
 import { useWeb3React } from '@web3-react/core';
 import { Web3Provider } from '@ethersproject/providers';
-
-import { ContentWrapper } from 'components/ContentWrapper'
-import ConnectButton from "components/ConnectButton";
-import Account from "components/Account";
 
 import {
   Center, 
   Link, 
-  SimpleGrid, 
-  Stack,
-  Tooltip,
-  useClipboard,
-  Text,
-  Flex 
+  Stack
 } from '@chakra-ui/react'
 import { ExternalLinkIcon } from "@chakra-ui/icons";
+
 import MainForm from 'components/MainForm';
+import { ContentWrapper } from 'components/ContentWrapper'
 
 import { compileERC721 } from 'lib/compile';
 import { useDefaultSkyDB } from "lib/useSkyDB";
@@ -44,7 +36,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
 export default function App({NFT, BidExecutor}: ContractProps) {
   const context = useWeb3React<Web3Provider>()
-  const { chainId, account, library } = context
+  const { account } = context
 
   const { onboardUser } = useDefaultSkyDB();
 
@@ -80,10 +72,6 @@ export default function App({NFT, BidExecutor}: ContractProps) {
             </Link>
           </Stack>        
         </Center>
-
-        {/* <Center mt="40px">
-          <Account />
-        </Center> */}
 
         <Center className="mt-8">
           <MainForm NFT={NFT} BidExecutor={BidExecutor} />     

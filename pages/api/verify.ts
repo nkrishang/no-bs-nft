@@ -5,7 +5,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   if(req.method !== "POST") return;
 
-  const { nft_address, bidExecutor_address, name, symbol } = req.body;
+  const { network, nft_address, bidExecutor_address, name, symbol } = req.body;
   console.log(`NFT Address: ${nft_address}, BE address: ${bidExecutor_address}, name: "${name}", symbol: "${symbol}"`);
 
   let outputs: any[] = [];
@@ -15,12 +15,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     
     setTimeout(() => {
       const bidExecutor_output = shell.exec(
-        `npx hardhat verify --network ropsten ${bidExecutor_address}`, 
+        `npx hardhat verify --network ${network} ${bidExecutor_address}`, 
         { encoding: 'utf-8' }
       )
       outputs.push(bidExecutor_output)
       const nft_output = shell.exec(
-        `npx hardhat verify --network ropsten ${nft_address} "${name}" "${symbol}" ${bidExecutor_address}`, 
+        `npx hardhat verify --network ${network} ${nft_address} "${name}" "${symbol}" ${bidExecutor_address}`, 
         { encoding: 'utf-8' }
       )
       outputs.push(nft_output);

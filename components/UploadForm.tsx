@@ -21,7 +21,7 @@ import { Web3Provider } from '@ethersproject/providers'
 
 import { ContentWrapper } from './ContentWrapper';
 import { ContentRenderer } from "./ContentRenderer"; 
-
+import { uploadMetadataToSkynet } from "lib/skynet";
 
 type UploadFormProps = {
   uploadToken: any;
@@ -60,34 +60,6 @@ export default function UploadForm({
     skyPortalRef.current = new SkynetClient(portal);
   }, []);
 
-  /// Uploads metadata json to skynet
-  const uploadMetadataToSkynet = useCallback(
-    async (mediaSkylink: string | null) => {
-      const metadata = {
-        name: name,
-        description: description,
-        image: mediaSkylink,
-      };
-
-      const blob: BlobPart = new Blob([JSON.stringify(metadata)], {
-        type: "application/json",
-      });
-
-      const metadataFile = new File([blob], "example.json");
-
-      try {
-        const { skylink } = await skyPortalRef.current.uploadFile(metadataFile);
-        
-        console.log("Metadata Skylink: ", skylink);
-
-        return skylink;
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    [name, description]
-  );
-
   const onDrop = useCallback(async (acceptedFiles) => {
     setImageSrc('');
     setSkylinkLoading(true);
@@ -116,7 +88,11 @@ export default function UploadForm({
     setTxLoading(true);
 
     try {
-      const metadataSkylink = await uploadMetadataToSkynet(mediaSkylink);
+      const metadataSkylink = await uploadMetadataToSkynet({
+        name,
+        description,
+        image: mediaSkylink
+      });
       console.log("Uploaded: ", metadataSkylink);
       setTxLoadingText('Minting');
       /// `uploadTokens` accepts an array of skylinks, even though we're uploading one at a time.

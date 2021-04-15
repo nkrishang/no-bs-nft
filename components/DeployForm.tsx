@@ -13,7 +13,8 @@ import { Web3Provider } from '@ethersproject/providers'
 
 import { ContentWrapper } from './ContentWrapper';
 
-import { deployERC721 } from 'lib/deploy';
+import { deployBidExecutor, deployERC721, setNFTFactory } from 'lib/deploy';
+import { supportedIds } from "lib/supportedIds";
 
 type DeployFormProps = {
   NFT: {abi: any, bytecode: any};
@@ -26,7 +27,7 @@ export default function DeployForm({NFT, BidExecutor, logTransaction, setContrac
   
   const toast = useToast();
   const context = useWeb3React<Web3Provider>()
-  const { library, account } = context
+  const { library, account, chainId } = context
 
   const [name, setName] = useState<string>('');
   const [symbol, setsymbol] = useState<string>('');
@@ -34,55 +35,83 @@ export default function DeployForm({NFT, BidExecutor, logTransaction, setContrac
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingText, setLoadingText] = useState<string>('');
 
+  const handleTxError = (err: any) => {
+    toast({
+      title: "Sorry, something went wrong. Please try again",
+      status: "error",
+      variant: "subtle",
+      duration: 10000,
+      isClosable: true,
+    });
+    console.log(err)
+  }
+
   const handleDeploy = async (library: any, account: any) => {
-    setLoadingText('Deploying')
+    setLoadingText('Tx 1 of 3: Deploying auction system')
     setLoading(true);
 
+    let bidExecutorAddress;
+    let nftAddress;
+
     try {
-      const {tx, address}: any = await deployERC721(NFT, BidExecutor, name, symbol, library.getSigner(account))
-      console.log("Setting address: ", address.nft);
-      setContractAddress(address.nft)
+      const {tx, address}: any = await deployBidExecutor(BidExecutor,library.getSigner(account));
+      await tx.wait()
+      await logTransaction(tx.hash);
+      bidExecutorAddress = address;
 
-      await logTransaction(tx.bidExecutor_deploy.hash)
-      await logTransaction(tx.nft_deploy.hash)
-  
-      setLoadingText("Verifying on Etherscan (est. 30s)")
+      setLoadingText("Tx 2 of 3: Deploying NFT collection")
+    } catch(err) {
+      handleTxError(err);
+    }
 
+    try {
+      const {tx, address}: any = await deployERC721(NFT, name, symbol, bidExecutorAddress, library.getSigner(account));
+      await tx.wait()
+      await logTransaction(tx.hash);
+      nftAddress = address;
+      setContractAddress(address);
+
+      setLoadingText("Tx 3 of 3:Configuring auction system");
+    } catch(err) {
+      handleTxError(err);
+    }
+
+    try {
+      const { tx }: any = await setNFTFactory(bidExecutorAddress, BidExecutor.abi, nftAddress, library.getSigner(account));
+      await tx.wait();
+      await logTransaction(tx.hash);
+      
+    } catch(err) {
+      handleTxError(err);
+    }
+
+    if(!(chainId == 137 || chainId == 80001)) {
+      setLoadingText("Verifying on Etherscan (est. 30s)");
       await fetch("/api/verify", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          nft_address: address.nft,
-          bidExecutor_address: address.bidExecutor,
+          network: supportedIds[(chainId as number).toString()].toLowerCase(),
+          nft_address: nftAddress,
+          bidExecutor_address: bidExecutorAddress, 
           name: name,
           symbol: symbol
         }),
       })
-
-      setName('');
-      setsymbol('');
-
-      toast({
-        title: "Your collection has been deployed! Scroll down for a link to the transaction.",
-        status: "success",
-        variant: "subtle",
-        duration: 10000,
-        isClosable: true,
-      });
-    } catch(err) {
-      
-      toast({
-        title: "Sorry, something went wrong. Please try again",
-        status: "error",
-        variant: "subtle",
-        duration: 10000,
-        isClosable: true,
-      });
-      
-      console.log(err);
     }
+
+    toast({
+      title: "Your collection has been deployed! Scroll down for a link to the transaction.",
+      status: "success",
+      variant: "subtle",
+      duration: 10000,
+      isClosable: true,
+    });
+
+    setName('');
+    setsymbol('');
     setLoading(false);
     setLoadingText('');
   }
