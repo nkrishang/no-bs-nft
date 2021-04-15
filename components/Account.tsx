@@ -96,7 +96,7 @@ export default function Account(): JSX.Element {
                   {supportedIds.ids.includes(chainId as number)
                     ? (
                         <Badge colorScheme="green" fontSize="1em" py="4px">
-                          {supportedIds[`${chainId as number}`]}
+                          {supportedIds[`${chainId as number}`].name}
                         </Badge>
                       )
                     : (

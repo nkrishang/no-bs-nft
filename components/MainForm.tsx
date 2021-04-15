@@ -18,6 +18,7 @@ import DeployForm from './DeployForm';
 
 import { useDefaultSkyDB } from "lib/useSkyDB";
 import useContractCalls from 'lib/useContractCalls';
+import { supportedIds } from 'lib/supportedIds';
 
 type MainFormProps = {
   NFT: {abi: any, bytecode: any};
@@ -27,7 +28,7 @@ type MainFormProps = {
 export default function MainForm({NFT, BidExecutor}: MainFormProps): JSX.Element {
 
   const context = useWeb3React<Web3Provider>()
-  const { account } = context
+  const { account, chainId } = context
 
   const { logTransaction, getDataFromSkyDB } = useDefaultSkyDB();
   const [transactions, setTransactions] = useState<string[]>([]);
@@ -101,7 +102,7 @@ export default function MainForm({NFT, BidExecutor}: MainFormProps): JSX.Element
                 <Link 
                   key={txhash}
                   isExternal
-                  href={`https://ropsten.etherscan.io/tx/${txhash}`}
+                  href={supportedIds[(chainId as number).toString()].explorer + txhash}
                   mx="8px"
                 >
                   {txhash}

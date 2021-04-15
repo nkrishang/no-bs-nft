@@ -88,7 +88,7 @@ export default function DeployForm({NFT, BidExecutor, logTransaction, setContrac
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          network: supportedIds[(chainId as number).toString()].toLowerCase(),
+          network: supportedIds[(chainId as number).toString()].name.toLowerCase(),
           nft_address: nftAddress,
           bidExecutor_address: bidExecutorAddress, 
           name: name,
