@@ -101,7 +101,7 @@ export default function Account(): JSX.Element {
                       )
                     : (
                       <p className={account ? "text-red-500" : ""}>
-                        {account ? "Please switch to Ropsten" : "Network: -"}
+                        {account ? "Please switch to a supported network." : "Network: -"}
                       </p>
                     )
                   }

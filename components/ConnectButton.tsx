@@ -33,7 +33,7 @@ export default function ConnectButton(): JSX.Element {
     if (error instanceof NoEthereumProviderError) {
       return 'No Ethereum browser extension detected, install MetaMask on desktop or visit from a dApp browser on mobile.'
     } else if (error instanceof UnsupportedChainIdError) {
-      return "You're connected to an unsupported network."
+      return "You're connected to an unsupported network. Networks supported: Mainnet, Matic, Ropsten, Mumbai."
     } else if (
       error instanceof UserRejectedRequestErrorInjected
     ) {

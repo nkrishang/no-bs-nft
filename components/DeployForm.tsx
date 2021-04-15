@@ -37,6 +37,8 @@ export default function DeployForm({NFT, BidExecutor, logTransaction, setContrac
   const [loadingText, setLoadingText] = useState<string>('');
 
   const handleTxError = (err: any) => {
+    setLoading(false);
+    setLoadingText('');
     errorToast(toast, "Sorry, something went wrong. Please try again");
     console.log(err)
   }
@@ -57,6 +59,7 @@ export default function DeployForm({NFT, BidExecutor, logTransaction, setContrac
       setLoadingText("Tx 2 of 3: Deploying NFT collection")
     } catch(err) {
       handleTxError(err);
+      return
     }
 
     try {
@@ -66,9 +69,10 @@ export default function DeployForm({NFT, BidExecutor, logTransaction, setContrac
       nftAddress = address;
       setContractAddress(address);
 
-      setLoadingText("Tx 3 of 3:Configuring auction system");
+      setLoadingText("Tx 3 of 3: Configuring auction system");
     } catch(err) {
       handleTxError(err);
+      return
     }
 
     try {
@@ -77,6 +81,7 @@ export default function DeployForm({NFT, BidExecutor, logTransaction, setContrac
       await logTransaction(tx.hash);
       
     } catch(err) {
+      return
       handleTxError(err);
     }
 
