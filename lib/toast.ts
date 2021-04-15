@@ -23,7 +23,7 @@ export const infoToast = (toast: any, message: string) => {
     title: message,
     status: "info",
     variant: "subtle",
-    duration: 10000,
+    duration: 30000,
     isClosable: true,
   });
 }

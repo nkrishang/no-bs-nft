@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
 import {
@@ -16,7 +16,9 @@ import { infoToast } from 'lib/toast';
 export default function ConnectButton(): JSX.Element {
 
   const context = useWeb3React<Web3Provider>()
-  const { connector, activate, deactivate, active, error } = context
+  const { connector, activate, deactivate, active, error, account } = context
+
+  const [displayedError, setDisplayedError] = useState<boolean>(false);
   
   // handle logic to recognize the connector currently being activated
   const [activatingConnector, setActivatingConnector] = React.useState<any>()
@@ -33,6 +35,7 @@ export default function ConnectButton(): JSX.Element {
     if (error instanceof NoEthereumProviderError) {
       return 'No Ethereum browser extension detected, install MetaMask on desktop or visit from a dApp browser on mobile.'
     } else if (error instanceof UnsupportedChainIdError) {
+      setDisplayedError(true)
       return "You're connected to an unsupported network. Networks supported: Mainnet, Matic, Ropsten, Mumbai."
     } else if (
       error instanceof UserRejectedRequestErrorInjected
@@ -51,9 +54,15 @@ export default function ConnectButton(): JSX.Element {
   }, [])
 
   useEffect(() => {
+
+    if(account) setDisplayedError(false)
+
     if(error) {
       setActivatingConnector(undefined)
-      infoToast(toast, getErrorMessage(error));
+
+      if(!displayedError || !(error instanceof UnsupportedChainIdError)) {
+        infoToast(toast, getErrorMessage(error));
+      }
     }
   }, [error])
 

@@ -102,7 +102,7 @@ export default function MainForm({NFT, BidExecutor}: MainFormProps): JSX.Element
                 <Link 
                   key={txhash}
                   isExternal
-                  href={supportedIds[(chainId as number).toString()].explorer + txhash || ""}
+                  href={chainId ? supportedIds[(chainId as number).toString()].explorer + txhash : ""}
                   mx="8px"
                 >
                   {txhash}

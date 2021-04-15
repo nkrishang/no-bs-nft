@@ -46,8 +46,8 @@ export default function Account(): JSX.Element {
       padding="20px"
       bottom="40px"
       right="40px"
-      height="280px"
-      width="240px"
+      height="320px"
+      width="264px"
       overflowX="hidden"
       bg="white"
       borderRadius="12px"
@@ -100,8 +100,8 @@ export default function Account(): JSX.Element {
                         </Badge>
                       )
                     : (
-                      <p className={account ? "text-red-500" : ""}>
-                        {account ? "Please switch to a supported network." : "Network: -"}
+                      <p className={"text-red-500"}>
+                        Network: unsupported
                       </p>
                     )
                   }
@@ -113,7 +113,10 @@ export default function Account(): JSX.Element {
                     <p>Balance: {account ? ethBal.slice(0,5) + (chainId == 80001 || chainId == 137 ? " MATIC" : " ETH") : " -" }</p>
                   </Center>
                   <Link href="https://faucet.ropsten.be/" isExternal>
-                    Get some Ropsten ether <ExternalLinkIcon mx="2px" />
+                    Ropsten ether faucet <ExternalLinkIcon mx="2px" />
+                  </Link>
+                  <Link href="https://faucet.matic.network/" isExternal>
+                    Mumbai matic faucet <ExternalLinkIcon mx="2px" />
                   </Link>
                 </Stack>                
               </Center>
