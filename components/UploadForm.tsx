@@ -7,7 +7,6 @@ import {
   Input,
   Textarea,
   Flex,
-  Image,
   Spinner,
   Text,
   SimpleGrid,
@@ -21,7 +20,9 @@ import { Web3Provider } from '@ethersproject/providers'
 
 import { ContentWrapper } from './ContentWrapper';
 import { ContentRenderer } from "./ContentRenderer"; 
+
 import { uploadMetadataToSkynet } from "lib/skynet";
+import { errorToast, successToast } from "lib/toast";
 
 type UploadFormProps = {
   uploadToken: any;
@@ -40,6 +41,7 @@ export default function UploadForm({
   const { account } = context
 
   const skyPortalRef = useRef<any>();
+  const [mediaSkylink, setMediaskylink] = useState<string>('');
 
   const [skylinkLoading, setSkylinkLoading] = useState<boolean>(false);
   const [txLoading, setTxLoading] = useState<boolean>(false);
@@ -49,8 +51,6 @@ export default function UploadForm({
   const [description, setDescription] = useState<string>("");
   const [imageSrc, setImageSrc] = useState<string>('');
   const [mediaFile, setMediaFile] = useState<File | null>(null);
-
-  const [mediaSkylink, setMediaskylink] = useState<string>('');
 
   const toast = useToast();
   
@@ -66,11 +66,14 @@ export default function UploadForm({
 
     const [file] = acceptedFiles;
     setMediaFile(file);
+
     try {
-      const media = await skyPortalRef.current.uploadFile(file);
-      const parsedSkylink: string | null = parseSkylink(media.skylink);
-      setMediaskylink(media.skylink);
-      setImageSrc(parsedSkylink as string);
+      const { skylink } = await skyPortalRef.current.uploadFile(file);
+      const parsedSkylink: string | null = parseSkylink(skylink);
+
+      setMediaskylink(skylink);
+      setImageSrc(`https://siasky.net/${(parsedSkylink as string)}`);
+
     } catch (err) {
       console.log(err);
     }
@@ -78,9 +81,9 @@ export default function UploadForm({
     setSkylinkLoading(false);
   }, []);
 
-
-  const handleAddressInput = (addr: string) => {
-    setContractAddress(addr)
+  const handleError = (err: any) => {
+    errorToast(toast, "Sorry, something went wrong. Please try again");
+    console.log(err)
   }
 
   const handleMomentUpload = async () => {
@@ -93,32 +96,23 @@ export default function UploadForm({
         description,
         image: mediaSkylink
       });
+
       console.log("Uploaded: ", metadataSkylink);
       setTxLoadingText('Minting');
       /// `uploadTokens` accepts an array of skylinks, even though we're uploading one at a time.
       const tx = await uploadToken(account, metadataSkylink as string);
       console.log(tx);
-      toast({
-        title: "Your collection has been deployed! Scroll down for a link to the transaction.",
-        status: "success",
-        variant: "subtle",
-        duration: 10000,
-        isClosable: true,
-      });
 
+      successToast(
+        toast,
+        "Your collection has been deployed! Scroll down for a link to the transaction."
+      )
       setName("");
       setDescription("");
       setImageSrc("");
-    } catch(err) {
 
-      toast({
-        title: "Sorry, something went wrong. Please try again",
-        status: "error",
-        variant: "subtle",
-        duration: 10000,
-        isClosable: true,
-      });
-      console.log(err)
+    } catch(err) {
+      handleError(err);
     }
 
     setTxLoading(false);
@@ -141,7 +135,7 @@ export default function UploadForm({
               borderColor={ethereum_address.isAddress(contractAddress) ? "green.300" : ""}
               width="320px" 
               id="contract-address"
-              onChange={(e) => handleAddressInput(e.target.value)}
+              onChange={(e) => setContractAddress(e.target.value)}
               placeholder={"Enter ERC721 contract address"}
             />
           </>
@@ -201,7 +195,7 @@ export default function UploadForm({
             </Stack>  
             {imageSrc ? (
                 <ContentRenderer                                
-                  src={`https://siasky.net/${imageSrc}`}
+                  src={imageSrc}
                   file={mediaFile}
                 />
               ) : (

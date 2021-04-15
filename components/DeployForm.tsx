@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useState } from 'react';
 
 import {
   Button,
@@ -15,6 +15,7 @@ import { ContentWrapper } from './ContentWrapper';
 
 import { deployBidExecutor, deployERC721, setNFTFactory } from 'lib/deploy';
 import { supportedIds } from "lib/supportedIds";
+import { errorToast, successToast } from "lib/toast";
 
 type DeployFormProps = {
   NFT: {abi: any, bytecode: any};
@@ -36,13 +37,7 @@ export default function DeployForm({NFT, BidExecutor, logTransaction, setContrac
   const [loadingText, setLoadingText] = useState<string>('');
 
   const handleTxError = (err: any) => {
-    toast({
-      title: "Sorry, something went wrong. Please try again",
-      status: "error",
-      variant: "subtle",
-      duration: 10000,
-      isClosable: true,
-    });
+    errorToast(toast, "Sorry, something went wrong. Please try again");
     console.log(err)
   }
 
@@ -102,13 +97,10 @@ export default function DeployForm({NFT, BidExecutor, logTransaction, setContrac
       })
     }
 
-    toast({
-      title: "Your collection has been deployed! Scroll down for a link to the transaction.",
-      status: "success",
-      variant: "subtle",
-      duration: 10000,
-      isClosable: true,
-    });
+    successToast(
+      toast, 
+      "Your collection has been deployed! Scroll down for a link to the transaction."
+    )
 
     setName('');
     setsymbol('');

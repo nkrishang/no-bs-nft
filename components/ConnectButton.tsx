@@ -11,6 +11,7 @@ import { useEagerConnect, useInactiveListener } from 'lib/web3'
 import { injected } from 'lib/connectors'
 
 import { Button, useToast } from '@chakra-ui/react';
+import { infoToast } from 'lib/toast';
 
 export default function ConnectButton(): JSX.Element {
 
@@ -52,14 +53,7 @@ export default function ConnectButton(): JSX.Element {
   useEffect(() => {
     if(error) {
       setActivatingConnector(undefined)
-
-      toast({
-        title: getErrorMessage(error),
-        status: "info",
-        variant: "subtle",
-        duration: 10000,
-        isClosable: true,
-      });
+      infoToast(toast, getErrorMessage(error));
     }
   }, [error])
 
