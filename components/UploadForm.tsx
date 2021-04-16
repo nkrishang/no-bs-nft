@@ -11,17 +11,10 @@ import {
   Text,
   SimpleGrid,
   useToast,
-
   Menu,
   MenuButton,
   MenuList,
-  MenuItem,
-  MenuItemOption,
-  MenuGroup,
-  MenuOptionGroup,
-  MenuIcon,
-  MenuCommand,
-  MenuDivider,
+  MenuItem
 } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
 
@@ -55,9 +48,10 @@ export default function UploadForm({
 
   const skyPortalRef = useRef<any>();
   const [files, setFiles] = useState<File[]>([]);
+  const [totalFiles, setTotalFiles] = useState<number>(0);
   const [droppedFiles, setDroppedFiles] = useState<File[]>([]);
-  // const [fileEffect, setFileEffect] = useState<boolean>(true);
   const [mediaSkylink, setMediaskylink] = useState<string>('');
+  const [skylinksToUpload, setSkylinksToUpload] = useState<string[]>([]);
 
   const [skylinkLoading, setSkylinkLoading] = useState<boolean>(false);
   const [txLoading, setTxLoading] = useState<boolean>(false);
@@ -81,13 +75,13 @@ export default function UploadForm({
 
   useEffect(() => {
     setFiles([...files, ...droppedFiles]);
+    setTotalFiles(totalFiles + droppedFiles.length);
     console.log("All files: ", files);
   }, [droppedFiles])
 
   useEffect(() => {
     const [file] = files;
-
-    if(files.length > 1 && file !== mediaFile) {
+    if(files.length > 0 && file !== mediaFile) {
       console.log("Hello")
       handleMediaContent(file);
     }
@@ -179,6 +173,7 @@ export default function UploadForm({
       });
 
       // Handle tx logic here
+      setSkylinksToUpload([...skylinksToUpload, metadataSkylink]);
 
       setName("");
       setDescription("");
@@ -323,7 +318,14 @@ export default function UploadForm({
                 isLoading={txLoading} 
                 loadingText={txLoadingText}
               >
-                Upload token to collection
+
+                {uploadType == "single token"
+                  ? "Upload token to collection"
+                  : files.length == 0 || skylinksToUpload.length == files.length
+
+                    ? "Upload tokens to collection"
+                    : `Prepare token ${skylinksToUpload.length + 1} of ${totalFiles} for collection`
+                }
               </Button>
             </Stack>
             <Stack>
@@ -360,8 +362,11 @@ export default function UploadForm({
                   }
                 </Flex>
               )}
-              <Text hidden={files.length == 0}>
-                Queued {files.length} {files.length == 1 ? "file" : "files"}. You can preview and upload them one after another.
+              <Text hidden={files.length == 0 || uploadType == "single token"}>
+                { skylinksToUpload.length == files.length
+                  ? `Queued ${files.length} ${files.length == 1 ? "file" : "files"}. You can preview and upload them one after another.`
+                  : "All tokens prepared for your collection!"
+                }
               </Text>
               </Stack>  
           </SimpleGrid>  
