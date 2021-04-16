@@ -28,7 +28,7 @@ module.exports = {
       accounts: [`${TEST_PRIVATE_KEY}`]
     },
     matic: {
-      url: "https://rpc-mainnet.maticvigil.com/",
+      url: "https://rpc.maticvigil.com/?jwt=eyJhbGciOiJIUzI1NiJ9.a3Jpc2hhbmcubm90ZUBnbWFpbC5jb20.VM9Ae_oaBmEPbhAKH9nxq-ZwhAVlIEx_XhLirvfvswc",
       accounts: [`${TEST_PRIVATE_KEY}`]
     }
   },

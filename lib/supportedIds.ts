@@ -10,10 +10,10 @@ export const supportedIds: any = {
   },
   137: {
     name: "Matic",
-    explorer: "https://explorer-mumbai.maticvigil.com/tx/"
+    explorer: "https://explorer-mainnet.maticvigil.com/tx/"
   },
   80001: {
     name: "Mumbai",
-    explorer: "https://explorer-mainnet.maticvigil.com/tx/"
+    explorer: "https://explorer-mumbai.maticvigil.com/tx/"
   }
 }

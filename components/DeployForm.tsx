@@ -81,8 +81,8 @@ export default function DeployForm({NFT, BidExecutor, logTransaction, setContrac
       await logTransaction(tx.hash);
       
     } catch(err) {
-      return
       handleTxError(err);
+      return
     }
 
     if(!(chainId == 137 || chainId == 80001)) {
