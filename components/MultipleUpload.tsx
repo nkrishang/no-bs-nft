@@ -12,37 +12,29 @@ import {
   SimpleGrid,
   useToast,
   useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
 } from '@chakra-ui/react';
 
 import useUser from "lib/useUser";
 
 import { useDropzone } from "react-dropzone";
 import { parseSkylink, SkynetClient } from "skynet-js";
-import { useWeb3React } from '@web3-react/core'
-import { Web3Provider } from '@ethersproject/providers'
 
 import { ContentRenderer } from "./ContentRenderer"; 
 
 import { uploadMetadataToSkynet } from "lib/skynet";
 import { errorToast, successToast } from "lib/toast";
 
+import UploadModal from "components/UploadModal";
+
 type MultipleUploadProps = {
   uploadToken: any;
+  contractAddress: string
 }
 
 export default function MultipleUpload({
-  uploadToken 
+  uploadToken,
+  contractAddress 
 }: MultipleUploadProps): JSX.Element {
-
-  const context = useWeb3React<Web3Provider>()
-  const { account } = context
 
   // MAGIC LINK LOGIC
 
@@ -70,11 +62,21 @@ export default function MultipleUpload({
 
   const [tokenAmount, setTokenAmount] = useState<string>('');
   const [skylinksToUpload, setSkylinksToUpload] = useState<string[]>([]);
-  const [tokensToUpload, setTokensToUplaod] = useState<any>([]);
-  
-  const [email, setEmail] = useState<string>('');
+  const [tokensToUpload, setTokensToUpload] = useState<any>([]);
 
   const toast = useToast();
+
+  const revertState = () => {
+    setTotalFiles(0);
+    setFiles([]);
+    setDroppedFiles([]);
+
+    setMediaFile(null);
+    setMediaskylink('');
+
+    setTokensToUpload([])
+    setSkylinksToUpload([]);
+  }
   
   /// Set skynet portal
   useEffect(() => {
@@ -85,16 +87,17 @@ export default function MultipleUpload({
   useEffect(() => {
     setFiles([...files, ...droppedFiles]);
     setTotalFiles(totalFiles + droppedFiles.length);
-    console.log("All files: ", files);
+    
   }, [droppedFiles])
 
   useEffect(() => {
     const [file] = files;
-    console.log("Total files: ", totalFiles)
     
-    if(files.length > 0 && file !== mediaFile) {
-      console.log("Hello")
-      handleMediaContent(file);
+    if(file) {
+      if(files.length > 0 && file !== mediaFile) {
+
+        handleMediaContent(file);
+      }
     }
     
   }, [files])
@@ -153,18 +156,18 @@ export default function MultipleUpload({
         image: mediaSkylink
       });
 
-      // Handle tx logic here
       setSkylinksToUpload([...skylinksToUpload, metadataSkylink]);
-      setTokensToUplaod([
+      setTokensToUpload([
         ...tokensToUpload,
         {
           URI: metadataSkylink,
-          amount: tokenAmount
+          amount: tokenAmount == '' ? 1 : parseInt(tokenAmount)
         }
       ])
 
       setName("");
       setDescription("");
+      setTokenAmount('');
 
       const updatedFiles = await nextMediaContent();
 
@@ -183,18 +186,9 @@ export default function MultipleUpload({
     setTxLoading(false);
     setTxLoadingText('');
   }
-
-  const uploadTokensTransaction = async () => {
-
-  }
   
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
   const { isOpen, onOpen, onClose } = useDisclosure()
-
-  function validateEmail(email: string) {
-    const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email);
-  }
 
   return (
     <>    
@@ -262,69 +256,37 @@ export default function MultipleUpload({
               value={tokenAmount}
               onChange={(e) => setTokenAmount(e.target.value)}
               id="token-amount" 
-              placeholder="E.g. 50"
+              placeholder="E.g. 1 (by default)"
             />
             <Button 
-              onClick={handleMultipleTokenUpload}
-              // isDisabled={(contractAddress == '') || !ethereum_address.isAddress(contractAddress)} 
+              onClick={files.length == 0 || skylinksToUpload.length == files.length
+                ? onOpen
+                : handleMultipleTokenUpload
+              }
+              isDisabled={(contractAddress == '' || totalFiles == 0 || (tokenAmount != '' && isNaN(parseInt(tokenAmount))) )} 
               border={(totalFiles != 0 && skylinksToUpload.length == totalFiles) ? "2px" : ""}
               borderColor={(totalFiles != 0 && skylinksToUpload.length == totalFiles) ? "green.500" : ""}
               isLoading={txLoading} 
               loadingText={txLoadingText}
             >
               {files.length == 0 || skylinksToUpload.length == files.length
-                ? "Upload all tokens to collection"
+                ? "Upload all tokens to your NFT collection"
                 : `Prepare token ${skylinksToUpload.length + 1} of ${totalFiles} for collection`
               }
             </Button>
-
-            <Button onClick={onOpen} hidden={!(totalFiles != 0 && skylinksToUpload.length == totalFiles)}>
-              Get notified when your tokens are uploaded.
-            </Button>
-
-            <Modal
-              isOpen={isOpen}
-              onClose={onClose}
-            >
-              <ModalOverlay />
-              <ModalContent>
-                <ModalHeader>Get notified.</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody pb={6}>
-                  <Text color="#999" mt="12px" fontSize="14px">
-                    {`Uploading multiple tokens can take time. We ask for your email to notify you when your tokens are uploaded.`}
-                  </Text>
-
-                  <Text color="#999" mt="12px" fontSize="14px">
-                    {`Under the hood: your email will be used to create a secure, magic link wallet for you, so that you won't
-                      need to confirm every single transaction with Metamask
-                    `}
-                  </Text>
-                  
-                  <Input
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    mt="32px"
-                    border="none"
-                    fontWeight="normal"
-                    width="300px"
-                    borderBottom="2px solid #333 !important"
-                    borderRadius="0px"
-                    placeholder="krishang@nftlabs.co"
-                    _focus={{
-                      borderBottom: "2px solid #666 !important",
-                    }}
-                  />                  
-                </ModalBody>
-
-                <ModalFooter>
-                  <Button type="submit" mr="3" onClick={() => login(email)}>
-                    Submit email
-                  </Button>
-                  <Button onClick={onClose}>Cancel</Button>
-                </ModalFooter>
-              </ModalContent>
-            </Modal>
+            
+            <UploadModal 
+              txParams={{
+                transactions: tokensToUpload,
+                uploadToken: uploadToken
+              }}
+              modalParams={{
+                isOpen: isOpen,                
+                onClose: onClose
+              }}
+              onSuccessfulTx={revertState}
+            />
+            
           </Stack>
           <Stack>
           {imageSrc ? (
@@ -366,7 +328,7 @@ export default function MultipleUpload({
                 : skylinksToUpload.length == totalFiles
 
                   ? "All tokens prepared for your collection!"
-                  : `Queued ${files.length} ${files.length == 1 ? "file" : "files"}. You can preview and upload them one after another.`
+                  : `Queued ${files.length} ${files.length == 1 ? "file" : "files"}. You can preview and upload files one after another.`
               }
             </Text>
             </Stack>  

@@ -7,7 +7,8 @@ import {
   TabPanels,
   Tab,
   TabPanel,
-  Link
+  Link,
+  useToast,
 } from '@chakra-ui/react';
 
 import { useWeb3React } from '@web3-react/core'
@@ -19,6 +20,7 @@ import DeployForm from './DeployForm';
 import { useDefaultSkyDB } from "lib/useSkyDB";
 import useContractCalls from 'lib/useContractCalls';
 import { supportedIds } from 'lib/supportedIds';
+import { errorToast, successToast } from "lib/toast";
 
 type MainFormProps = {
   NFT: {abi: any, bytecode: any};
@@ -35,6 +37,7 @@ export default function MainForm({NFT, BidExecutor}: MainFormProps): JSX.Element
   const [contractAddress, setContractAddress] = useState<string>('');
 
   const { uploadToken } = useContractCalls(contractAddress, NFT.abi) // CHECK
+  const toast = useToast();
 
   useEffect(() => {
     const getTxs = async () => {
@@ -59,9 +62,22 @@ export default function MainForm({NFT, BidExecutor}: MainFormProps): JSX.Element
     await logTransaction(account, txHash);
   }
 
-  const handleTokenUpload = async (to: string, skylink: string) => {
-    const tx = await uploadToken(to, skylink);
-    await logNewTransaction(tx.hash);
+  const handleTokenUpload = async (to: string, skylink: string, txNonce: number) => {
+    try {
+      const tx = await uploadToken(to, skylink, txNonce);
+      await logNewTransaction(tx.hash);
+
+      successToast(
+        toast,
+        "Your tokens have been uploaded to your NFT collection."
+      )
+    } catch(err) {
+      errorToast(
+        toast, 
+        "Something went wrong with your transaction."
+      );
+      console.log(err);
+    }
   }
 
   return (

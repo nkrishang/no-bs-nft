@@ -77,8 +77,8 @@ export default function UploadForm({
         </Stack>
     
         {uploadType == "single token"
-          ? <SingleUpload uploadToken={uploadToken}/>
-          : <MultipleUpload uploadToken={uploadToken}/>
+          ? <SingleUpload uploadToken={uploadToken} contractAddress={contractAddress}/>
+          : <MultipleUpload uploadToken={uploadToken} contractAddress={contractAddress}/>
         }
       </ContentWrapper>
     </>

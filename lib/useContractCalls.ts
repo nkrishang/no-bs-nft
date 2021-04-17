@@ -26,7 +26,7 @@ export default function useContractCalls(addr: string, abi: any) {
   }, [addr, abi])
 
   /// Uploads all URIs in skylinks as moments. Returns transaction object.
-  async function uploadToken(to: string, skylink: string) {
+  async function uploadToken(to: string, skylink: string, txNonce: number) {
     if (!library) return;
     console.log("Calling uploadToken with address: ", account);
     console.log("Minting to address: ", to);
@@ -34,7 +34,7 @@ export default function useContractCalls(addr: string, abi: any) {
     try {
       const tx = await contract.current
         .connect(library.getSigner(account as string))
-        .mint( to, skylink, { gasLimit: 1000000 });
+        .mint( to, skylink, { gasLimit: 1000000, nonce: txNonce });
 
       console.log("address:", to, "tx:", tx.hash);
       await tx.wait();

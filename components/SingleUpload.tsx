@@ -25,10 +25,12 @@ import { errorToast, successToast } from "lib/toast";
 
 type SingleUploadProps = {
   uploadToken: any;
+  contractAddress: string
 }
 
 export default function SingleUpload({
-  uploadToken
+  uploadToken,
+  contractAddress
 }: SingleUploadProps): JSX.Element {
 
   const context = useWeb3React<Web3Provider>()
