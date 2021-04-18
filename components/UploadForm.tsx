@@ -21,13 +21,14 @@ import MultipleUpload from "components/MultipleUpload";
 
 type UploadFormProps = {
   uploadToken: any;
-  
+  NFT: any;
   contractAddress: string;
   setContractAddress: any;
 }
 
 export default function UploadForm({
   uploadToken, 
+  NFT,
   contractAddress, 
   setContractAddress
 }: UploadFormProps): JSX.Element {
@@ -78,7 +79,7 @@ export default function UploadForm({
     
         {uploadType == "single token"
           ? <SingleUpload uploadToken={uploadToken} contractAddress={contractAddress}/>
-          : <MultipleUpload uploadToken={uploadToken} contractAddress={contractAddress}/>
+          : <MultipleUpload uploadToken={uploadToken} contractAddress={contractAddress} NFT={NFT}/>
         }
       </ContentWrapper>
     </>

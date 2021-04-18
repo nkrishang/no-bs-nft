@@ -33,7 +33,7 @@ import InjectedModal from "components/InjectedModal";
 import MagicModal from "components/MagicModal";
 import useUser from 'lib/useUser';
 
-export default function UploadModal({txParams, modalParams, onSuccessfulTx}: any): JSX.Element {
+export default function UploadModal({txParams, modalParams, onSuccessfulTx, NFT, contractAddress}: any): JSX.Element {
 
   const handleSuccessfulTx = () => {
     onSuccessfulTx();
@@ -99,8 +99,10 @@ export default function UploadModal({txParams, modalParams, onSuccessfulTx}: any
                 </h2>
                 <AccordionPanel pb={4}>
                   
-                  <MagicModal                     
+                  <MagicModal     
+                    contractAddress={contractAddress}                
                     txParams={txParams}
+                    NFT={NFT}
                   />
 
                 </AccordionPanel>

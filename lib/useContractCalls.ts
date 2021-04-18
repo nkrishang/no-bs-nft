@@ -47,8 +47,53 @@ export default function useContractCalls(addr: string, abi: any) {
     }
   }
 
+  /// Uploads all URIs in skylinks as moments. Returns transaction object.
+  async function uploadMagic(to: any, skylink: string, txNonce: number) {
+    if (!library) return;
+    console.log("Calling uploadToken with address: ", to);
+    console.log("Minting to address: ", to);
+    console.log("Skylink uploaded to contract: ", skylink);
+    console.log("contract current: ", contract.current)
+    try {
+      const tx = await contract.current
+        .connect(library.getSigner(account as string))
+        .mint( to, skylink, { gasLimit: 1000000, nonce: txNonce });
+
+      console.log("address:", to, "tx:", tx.hash);
+
+      await logTransaction(to, tx.hash);      
+
+      return tx;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  /// Grants account minter role
+  async function grantMinterRole(addr:string, txNonce: number) {
+    if (!library) return;
+    console.log("Calling grantMinterRole with address: ", account);
+
+    try {
+      const tx = await contract.current
+      .connect(library.getSigner(account as string))
+      .grantMinterRole( addr, { gasLimit: 1000000, nonce: txNonce });
+
+      console.log("address:", addr, "tx:", tx.hash);
+      await tx.wait();
+
+      await logTransaction(account, tx.hash);
+
+      return tx
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
   return {
-    uploadToken
+    uploadToken,
+    uploadMagic,
+    grantMinterRole
   };
 }
 

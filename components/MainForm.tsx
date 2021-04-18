@@ -101,6 +101,7 @@ export default function MainForm({NFT, BidExecutor}: MainFormProps): JSX.Element
             <UploadForm 
               uploadToken={handleTokenUpload} 
               contractAddress={contractAddress}
+              NFT={NFT}
               setContractAddress={setContractAddress}
             />
           </TabPanel>

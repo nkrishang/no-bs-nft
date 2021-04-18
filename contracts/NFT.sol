@@ -36,6 +36,11 @@ contract NFT is ERC721PresetMinterPauserAutoId {
         bidExecutor = _bidExecutor;
     }
 
+    /// @notice Grants minter role to `_addr`
+    function grantMinterRole(address _addr) external {
+        grantRole(MINTER_ROLE, _addr);
+    }
+
     /// @notice Returns the URI associated with `tokenId`. See EIP 721 metadata spec.
     function tokenURI(uint _tokenId) public view virtual override returns (string memory) {
         require(_exists(_tokenId), "ERC721Metadata: URI query for nonexistent token");

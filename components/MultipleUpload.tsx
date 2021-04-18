@@ -28,11 +28,13 @@ import UploadModal from "components/UploadModal";
 
 type MultipleUploadProps = {
   uploadToken: any;
+  NFT: any;
   contractAddress: string
 }
 
 export default function MultipleUpload({
   uploadToken,
+  NFT,
   contractAddress 
 }: MultipleUploadProps): JSX.Element {
 
@@ -263,7 +265,7 @@ export default function MultipleUpload({
                 ? onOpen
                 : handleMultipleTokenUpload
               }
-              isDisabled={(contractAddress == '' || totalFiles == 0 || (tokenAmount != '' && isNaN(parseInt(tokenAmount))) )} 
+              // isDisabled={(contractAddress == '' || totalFiles == 0 || (tokenAmount != '' && isNaN(parseInt(tokenAmount))) )} 
               border={(totalFiles != 0 && skylinksToUpload.length == totalFiles) ? "2px" : ""}
               borderColor={(totalFiles != 0 && skylinksToUpload.length == totalFiles) ? "green.500" : ""}
               isLoading={txLoading} 
@@ -276,9 +278,11 @@ export default function MultipleUpload({
             </Button>
             
             <UploadModal 
+              NFT={NFT}
+              contractAddress={contractAddress}
               txParams={{
                 transactions: tokensToUpload,
-                uploadToken: uploadToken
+                uploadToken: uploadToken,
               }}
               modalParams={{
                 isOpen: isOpen,                
