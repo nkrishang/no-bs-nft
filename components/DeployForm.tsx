@@ -20,11 +20,10 @@ import { errorToast, successToast } from "lib/toast";
 type DeployFormProps = {
   NFT: {abi: any, bytecode: any};
   BidExecutor: {abi: any, bytecode: any};
-  logTransaction: any;
   setContractAddress: any;
 }
 
-export default function DeployForm({NFT, BidExecutor, logTransaction, setContractAddress}: DeployFormProps): JSX.Element {
+export default function DeployForm({NFT, BidExecutor, setContractAddress}: DeployFormProps): JSX.Element {
   
   const toast = useToast();
   const context = useWeb3React<Web3Provider>()
@@ -53,7 +52,6 @@ export default function DeployForm({NFT, BidExecutor, logTransaction, setContrac
     try {
       const {tx, address}: any = await deployBidExecutor(BidExecutor,library.getSigner(account));
       await tx.wait()
-      await logTransaction(tx.hash);
       bidExecutorAddress = address;
 
       setLoadingText("Tx 2 of 3: Deploying NFT collection")
@@ -65,7 +63,7 @@ export default function DeployForm({NFT, BidExecutor, logTransaction, setContrac
     try {
       const {tx, address}: any = await deployERC721(NFT, name, symbol, bidExecutorAddress, library.getSigner(account));
       await tx.wait()
-      await logTransaction(tx.hash);
+      
       nftAddress = address;
       setContractAddress(address);
 
@@ -78,7 +76,6 @@ export default function DeployForm({NFT, BidExecutor, logTransaction, setContrac
     try {
       const { tx }: any = await setNFTFactory(bidExecutorAddress, BidExecutor.abi, nftAddress, library.getSigner(account));
       await tx.wait();
-      await logTransaction(tx.hash);
       
     } catch(err) {
       handleTxError(err);

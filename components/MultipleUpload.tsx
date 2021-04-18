@@ -18,6 +18,8 @@ import useUser from "lib/useUser";
 
 import { useDropzone } from "react-dropzone";
 import { parseSkylink, SkynetClient } from "skynet-js";
+import { useWeb3React } from '@web3-react/core'
+import { Web3Provider } from '@ethersproject/providers'
 
 import { ContentRenderer } from "./ContentRenderer"; 
 
@@ -25,19 +27,20 @@ import { uploadMetadataToSkynet } from "lib/skynet";
 import { errorToast, successToast } from "lib/toast";
 
 import UploadModal from "components/UploadModal";
+import useGasPrice from 'lib/useGasPrice';
 
 type MultipleUploadProps = {
-  uploadToken: any;
   NFT: any;
   contractAddress: string
 }
 
 export default function MultipleUpload({
-  uploadToken,
   NFT,
   contractAddress 
 }: MultipleUploadProps): JSX.Element {
 
+  const context = useWeb3React<Web3Provider>()
+  const { chainId } = context
   // MAGIC LINK LOGIC
 
   const { user, login } = useUser();
@@ -66,7 +69,10 @@ export default function MultipleUpload({
   const [skylinksToUpload, setSkylinksToUpload] = useState<string[]>([]);
   const [tokensToUpload, setTokensToUpload] = useState<any>([]);
 
+  const [estimatedCost, setEstimatedCost] = useState<string>('')
+
   const toast = useToast();
+  const { costEstimates } = useGasPrice(chainId as number || 1);
 
   const revertState = () => {
     setTotalFiles(0);
@@ -79,7 +85,23 @@ export default function MultipleUpload({
     setTokensToUpload([])
     setSkylinksToUpload([]);
   }
-  
+
+  useEffect(() => {
+    if(tokensToUpload.length > 0) {
+      
+      let numOfTxs = 0;
+      for(let token of tokensToUpload) {
+        numOfTxs += token.amount;
+      }
+      console.log("Num of txs: ", numOfTxs);
+      const cost = 
+      (costEstimates.uploadTransaction.length > 4 ? parseFloat(costEstimates.uploadTransaction.slice(0,4)) : parseFloat(costEstimates.uploadTransaction)
+      ) * numOfTxs;
+      console.log("COST: ", cost);
+      setEstimatedCost(cost.toString());
+    }
+  }, [tokensToUpload])
+
   /// Set skynet portal
   useEffect(() => {
     const portal = "https://siasky.net/";
@@ -191,7 +213,7 @@ export default function MultipleUpload({
   
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
   const { isOpen, onOpen, onClose } = useDisclosure()
-
+  
   return (
     <>    
     
@@ -260,30 +282,35 @@ export default function MultipleUpload({
               id="token-amount" 
               placeholder="E.g. 1 (by default)"
             />
-            <Button 
-              onClick={files.length == 0 || skylinksToUpload.length == files.length
-                ? onOpen
-                : handleMultipleTokenUpload
-              }
-              // isDisabled={(contractAddress == '' || totalFiles == 0 || (tokenAmount != '' && isNaN(parseInt(tokenAmount))) )} 
-              border={(totalFiles != 0 && skylinksToUpload.length == totalFiles) ? "2px" : ""}
-              borderColor={(totalFiles != 0 && skylinksToUpload.length == totalFiles) ? "green.500" : ""}
-              isLoading={txLoading} 
-              loadingText={txLoadingText}
-            >
-              {files.length == 0 || skylinksToUpload.length == files.length
-                ? "Upload all tokens to your NFT collection"
-                : `Prepare token ${skylinksToUpload.length + 1} of ${totalFiles} for collection`
-              }
-            </Button>
+            <Stack>
+              <Button 
+                onClick={files.length == 0 || skylinksToUpload.length == files.length
+                  ? onOpen
+                  : handleMultipleTokenUpload
+                }
+                // isDisabled={(contractAddress == '' || totalFiles == 0 || (tokenAmount != '' && isNaN(parseInt(tokenAmount))) )} 
+                border={(totalFiles != 0 && skylinksToUpload.length == totalFiles) ? "2px" : ""}
+                borderColor={(totalFiles != 0 && skylinksToUpload.length == totalFiles) ? "green.500" : ""}
+                isLoading={txLoading} 
+                loadingText={txLoadingText}
+              >
+                {files.length == 0 || skylinksToUpload.length == files.length
+                  ? "Upload all tokens to your NFT collection"
+                  : `Prepare token ${skylinksToUpload.length + 1} of ${totalFiles} for collection`
+                }
+              </Button>
+              <Text>
+                {totalFiles == 0 || skylinksToUpload.length == 0
+                  ? `Est. cost of uploading 1 token: ${costEstimates.uploadTransaction} USD`
+                  : `Est. total cost of uploading: ${estimatedCost} USD`
+                }
+              </Text>
+            </Stack>
             
             <UploadModal 
               NFT={NFT}
               contractAddress={contractAddress}
-              txParams={{
-                transactions: tokensToUpload,
-                uploadToken: uploadToken,
-              }}
+              transactions={tokensToUpload}
               modalParams={{
                 isOpen: isOpen,                
                 onClose: onClose

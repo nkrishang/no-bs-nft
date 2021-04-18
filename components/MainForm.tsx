@@ -36,9 +36,6 @@ export default function MainForm({NFT, BidExecutor}: MainFormProps): JSX.Element
   const [transactions, setTransactions] = useState<string[]>([]);
   const [contractAddress, setContractAddress] = useState<string>('');
 
-  const { uploadToken } = useContractCalls(contractAddress, NFT.abi) // CHECK
-  const toast = useToast();
-
   useEffect(() => {
     const getTxs = async () => {
       const data = await getDataFromSkyDB();
@@ -57,82 +54,60 @@ export default function MainForm({NFT, BidExecutor}: MainFormProps): JSX.Element
     }
   }, [account])
 
-  const logNewTransaction = async (txHash: string) => {
-    setTransactions([...transactions, txHash]);
-    await logTransaction(account, txHash);
-  }
-
-  const handleTokenUpload = async (to: string, skylink: string, txNonce: number) => {
-    try {
-      const tx = await uploadToken(to, skylink, txNonce);
-      await logNewTransaction(tx.hash);
-
-      successToast(
-        toast,
-        "Your tokens have been uploaded to your NFT collection."
-      )
-    } catch(err) {
-      errorToast(
-        toast, 
-        "Something went wrong with your transaction."
-      );
-      console.log(err);
-    }
-  }
-
   return (
-    <Stack direction="column" mb="20px">
-      <Tabs isFitted variant="enclosed" width="900px" mb="20px">
-        <TabList>
-          <Tab> Deploy your NFT collection</Tab>
-          <Tab>Upload media to your collection</Tab>
-        </TabList>
+    
+      <Stack direction="column" mb="20px">
+        <Tabs isFitted variant="enclosed" width="900px" mb="20px">
+          <TabList>
+            <Tab> Deploy your NFT collection</Tab>
+            <Tab>Upload media to your collection</Tab>
+          </TabList>
 
-        <TabPanels>
-          <TabPanel>
-            <DeployForm 
-              NFT={NFT}  
-              BidExecutor={BidExecutor} 
-              logTransaction={logNewTransaction} 
-              setContractAddress={setContractAddress}
-            />
-          </TabPanel>
-          <TabPanel>
-            <UploadForm 
-              uploadToken={handleTokenUpload} 
+          <TabPanels>
+            <TabPanel>
+              <DeployForm 
+                NFT={NFT}  
+                BidExecutor={BidExecutor}                  
+                setContractAddress={setContractAddress}
+              />
+            </TabPanel>
+            <TabPanel>
+
+            <UploadForm  
+              NFT={NFT}                           
               contractAddress={contractAddress}
-              NFT={NFT}
               setContractAddress={setContractAddress}
             />
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
 
-      {transactions.length
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
 
-        ? (
-          <Stack mb="16px">
-            <p className="text-2xl font-bold">Your transactions</p>
+        {transactions.length
 
-            {transactions.map(txhash => {
-              return (
-                <Link 
-                  key={txhash}
-                  isExternal
-                  href={chainId ? supportedIds[(chainId as number).toString()].explorer + txhash : ""}
-                  mx="8px"
-                >
-                  {txhash}
-                </Link>
-              )
-            })}
-          </Stack>
-        )
+          ? (
+            <Stack mb="16px">
+              <p className="text-2xl font-bold">Your transactions</p>
 
-        : (
-          ''
-        )
-      }
-    </Stack>
+              {transactions.map(txhash => {
+                return (
+                  <Link 
+                    key={txhash}
+                    isExternal
+                    href={chainId ? supportedIds[(chainId as number).toString()].explorer + txhash : ""}
+                    mx="8px"
+                  >
+                    {txhash}
+                  </Link>
+                )
+              })}
+            </Stack>
+          )
+
+          : (
+            ''
+          )
+        }
+      </Stack>
   )
 }

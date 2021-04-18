@@ -6,9 +6,10 @@ import {
 
 import { useWeb3React } from '@web3-react/core'
 import { Web3Provider } from '@ethersproject/providers'
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
+import { ethers } from "ethers"
 
-export default function InjectedModal({txParams, onSuccessfulTx}: any): JSX.Element {
+export default function InjectedModal({contractAddress, NFT, transactions, onSuccessfulTx}: any): JSX.Element {
 
   const context = useWeb3React<Web3Provider>()
   const { account, library } = context
@@ -16,14 +17,17 @@ export default function InjectedModal({txParams, onSuccessfulTx}: any): JSX.Elem
   const [loading, setLoading] = useState<boolean>(false)
   const [loadingText, setLoadingText] = useState<string>('');
 
+  const [contract, setContract] = useState<any>('');
   const [numOfTransactions, setNumOfTransactions] = useState<number>(0);
+
+  const [success, setSuccess] = useState<boolean>(false);
 
   const getNumOfTransactions = (): number => {
     
-    if(txParams.transactions.length == 0) return 0;
+    if(transactions.length == 0) return 0;
     
     let num = 0;
-    for(const token of txParams.transactions) {
+    for(const token of transactions) {
       num += token.amount;
     }
     
@@ -34,14 +38,26 @@ export default function InjectedModal({txParams, onSuccessfulTx}: any): JSX.Elem
     const num: number = getNumOfTransactions();
     setNumOfTransactions(num);
   })
+
+  useEffect(() => {
+    if(library && account) {
+      try {
+        const nftContract = new ethers.Contract(contractAddress, NFT.abi, library?.getSigner(account as string))
+        setContract(nftContract);
+      } catch(err) {
+        console.log(err)
+        return
+      }
+    }
+    
+  }, [contractAddress, NFT, library, account])
   
 
   const uploadTokensTransaction = async (library: any, account: any) => {
     
     setLoadingText("Uploading tokens")
     setLoading(true)
-    
-    const { transactions, uploadToken } = txParams;
+
     const numOfTokens = transactions.length
     let txNumber = 1;
 
@@ -53,12 +69,21 @@ export default function InjectedModal({txParams, onSuccessfulTx}: any): JSX.Elem
       for(let j = 1; j <= amount; j++) {
         setLoadingText(`Uploading token ${i + 1} of ${numOfTokens}. (Transaction ${txNumber} of ${numOfTransactions})`)
 
-        await uploadToken(account, URI, txNonce)
+        try {
+          const tx = await contract.mint(account, URI, {
+            gasLimit: 1000000,
+            nonce: txNonce
+          });
+          await tx.wait()
+          txNumber++
+          txNonce++
 
-        txNumber++
-        txNonce++
+          console.log("TX hash: ", tx.hash);
+        } catch(err) {
+          console.log(err)
+        }      
       }
-      
+      setSuccess(true);
       onSuccessfulTx();
       setLoading(false)
     }
@@ -76,8 +101,13 @@ export default function InjectedModal({txParams, onSuccessfulTx}: any): JSX.Elem
           onClick={() => uploadTokensTransaction(library, account)}
           isLoading={loading}
           loadingText={loadingText}
+          colorScheme={success ? "green" : "gray"}
+          isDisabled={success}
         >
-          Upload all tokens to your NFT collection
+          {success
+            ? `All tokens have been uploaded to your NFT collection!`
+            : "Upload all tokens to your NFT collection"
+          }
         </Button>
       </Stack>
     </>
