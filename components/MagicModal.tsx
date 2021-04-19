@@ -57,48 +57,45 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
   }, [user, check])
 
   useEffect(() => {
-    if(user?.isLoggedIn) {
-
-      let magic: any;
-      // magic key
-      switch(chainId) {
-        case 1:
-          magic = new Magic("pk_live_5F8BDFD9AA53D653")
-          break;
-        case 3:
-          magic = new Magic("pk_live_5F8BDFD9AA53D653", {
-            network: "ropsten"
-          });
-          break;
-        case 137:
-          magic = new Magic("pk_live_5F8BDFD9AA53D653", {
-            network: {
-              rpcUrl: supportedIds[chainId].url,
-              chainId: chainId
-            }
-          });
-          break;
-        case 80001:
-          magic = magic = new Magic("pk_live_5F8BDFD9AA53D653", {
-            network: {
-              rpcUrl: supportedIds[chainId].url,
-              chainId: chainId
-            }
-          });
-          break;
-        default:
-          break;
-      }
-
-      const rpc: any = magic.rpcProvider
-      const provider = new ethers.providers.Web3Provider(rpc);
-      const signer = provider.getSigner();
-
-      const nftContract = new ethers.Contract(contractAddress, NFT.abi, signer);
-      
-      setMagicSigner(signer);
-      setMagicContract(nftContract);
+    let magic: any;
+    // magic key
+    switch(chainId) {
+      case 1:
+        magic = new Magic("pk_live_5F8BDFD9AA53D653")
+        break;
+      case 3:
+        magic = new Magic("pk_live_5F8BDFD9AA53D653", {
+          network: "ropsten"
+        });
+        break;
+      case 137:
+        magic = new Magic("pk_live_5F8BDFD9AA53D653", {
+          network: {
+            rpcUrl: supportedIds[chainId].url,
+            chainId: chainId
+          }
+        });
+        break;
+      case 80001:
+        magic = magic = new Magic("pk_live_5F8BDFD9AA53D653", {
+          network: {
+            rpcUrl: supportedIds[chainId].url,
+            chainId: chainId
+          }
+        });
+        break;
+      default:
+        break;
     }
+
+    const rpc: any = magic.rpcProvider
+    const provider = new ethers.providers.Web3Provider(rpc);
+    const signer = provider.getSigner();
+
+    const nftContract = new ethers.Contract(contractAddress, NFT.abi, signer);
+    
+    setMagicSigner(signer);
+    setMagicContract(nftContract);
   }, [user, chainId])
 
   useEffect(() => {
@@ -203,6 +200,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     }
     
     let txNonce_magic = await magicSigner.getTransactionCount();
+    console.log("MAGIC SIGNER: ", magicSigner)
     console.log("MAGIC SIGNER balance before: ", await magicSigner.getBalance())
     try {
       for(let i = 0; i < transactions.length; i++) {
@@ -315,7 +313,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
           isLoading={loginLoading || loading}
           loadingText={loadingText}
           colorScheme={success ? "green" : "gray"}
-          isDisabled={success || (!user?.isLoggedIn && email != '' && !validateEmail(email))}
+          isDisabled={success || (!user?.isLoggedIn && !validateEmail(email))}
         >
           {success
             ? `We'll email you when all's done.`
