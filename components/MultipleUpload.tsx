@@ -171,7 +171,7 @@ export default function MultipleUpload({
   }
 
   const handleMultipleTokenUpload = async () => {
-    setTxLoadingText('Uploading to decentralised storage')
+    setTxLoadingText('Uploading to decentralized storage')
     setTxLoading(true);
 
     try {

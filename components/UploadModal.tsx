@@ -54,6 +54,12 @@ export default function UploadModal({transactions, NFT, contractAddress, modalPa
               `}
             </Text>
 
+            <Text my="2">
+              {`
+                We recommend using the email method when uploading multiple tokens.
+              `}
+            </Text>
+
             <Accordion allowToggle>
               <AccordionItem>
                 <h2>
@@ -89,10 +95,7 @@ export default function UploadModal({transactions, NFT, contractAddress, modalPa
                         </p>
                         <Link href="https://magic.link/" isExternal>
                           (magic.link)
-                        </Link>
-                        <Badge ml="8" colorScheme="green">
-                          Recommended
-                        </Badge>
+                        </Link>                        
                       </HStack>
                     </Box>
                     <AccordionIcon />
