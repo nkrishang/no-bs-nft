@@ -4,7 +4,7 @@ import { Magic as MagicClient } from "magic-sdk";
 import { isClient } from "lib/isClient";
 import { RPCConnector } from "lib/rpc_connector";
 
-export const magicServer = new MagicServer(process.env.MAGIC_SECRET_KEY);
+export const magicServer = new MagicServer(process.env.NEXT_PUBLIC_MAGIC_SECRET_KEY);
 export const magicClient = isClient()
   ? new MagicClient(process.env.NEXT_PUBLIC_MAGIC_KEY as string, {
       network: "ropsten",
