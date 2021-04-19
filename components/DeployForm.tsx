@@ -118,7 +118,7 @@ export default function DeployForm({logContractAddress, NFT, BidExecutor, setCon
 
     successToast(
       toast, 
-      "Your collection has been deployed! Scroll down for a link to the transaction."
+      `Your NFT collection has been created on ${supportedIds[chainId as number].name}.`
     )
 
     setName('');
