@@ -242,20 +242,18 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     <>
       <Text my="2">
         {`
-          You need to confirm only one transaction. We will send you an email once all your tokens
-          have been uploaded to your collection.
+          You need to confirm only one transaction. 
+        `}
+        {`
+          We ask you to deposit the total (estimated) transaction cost into your
+          non-cutodial magic link wallet.
         `}
       </Text>
 
       <Text my="2">
         {`
-          We ask you to deposit the total (estimated) transaction cost plus 10% for leeway, into your
-          non-cutodial magic link wallet.
-        `}
-      </Text>
-      <Text my="2">
-        {`
-          We keep the remainder as fees.
+          We will send you an email once all your tokens
+          have been uploaded to your collection.
         `}
       </Text>
       
@@ -294,7 +292,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
           isLoading={loginLoading || loading}
           loadingText={loadingText}
           colorScheme={success ? "green" : "gray"}
-          isDisabled={success}
+          isDisabled={success || (!user?.isLoggedIn && email != '' && !validateEmail(email))}
         >
           {success
             ? `We'll email you when all's done.`
