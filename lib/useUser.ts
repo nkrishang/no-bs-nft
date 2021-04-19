@@ -8,7 +8,8 @@ import useSWR from "swr";
 type UserHandler = {
   user?: AuthUserResponse;
   setUser: (properties: Record<string, any>) => void;
-  login: (email: string) => void;
+  // login: (email: string) => void;
+  login: any
   logout: () => void;
 };
 
@@ -35,11 +36,12 @@ export default function useUser(): UserHandler {
     });
 
     if (res.status === 200) {
-      toast({ title: "Login Successful", status: "success" });
+      toast({ title: "Magic.link wallet retrieved", status: "success" });
+      return true
     } else {
       toast({ title: "Login Failed", status: "error" });
+      return false
     }
-
     // router.push("/marketplace");
   }
 

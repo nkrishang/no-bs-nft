@@ -48,12 +48,13 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     console.log("USER PUBLIC ADDR: ", user?.publicAddress)
 
     if(user?.isLoggedIn) {
+      console.log("Checking logged in user")
       setEmail(user.email as string)
       setLoginLoading(false)
     }
 
     console.log("Checking")
-  }, [user])
+  }, [user, check])
 
   useEffect(() => {
     if(user?.isLoggedIn) {
@@ -130,10 +131,21 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
   }
 
   const handleLogin = async (email: string) => {
-    setLoadingText("Getting your magic link wallet");
+    setLoadingText("Getting your magic link wallet. This may take a minute.");
     setLoginLoading(true)
-    login(email);
-    setCheck(!check);
+    const success = await login(email);
+
+    if(success) {
+      console.log("LOGIN SUCCESS")
+      setCheck(!check);
+    } else {
+      console.log("LOGIN UNSUCCESSFUL")
+      setLoginLoading(false)
+      errorToast(
+        toast,
+        "Could not generate magic link wallet. Please use metamask."
+      )
+    }
   }
 
   function validateEmail(email: string) {
