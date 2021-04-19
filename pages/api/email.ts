@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { ethers } from 'ethers';
 import { supportedIds } from "lib/supportedIds";
-import { emailPassword } from "lib/emailCredentials";
 
 const nodemailer = require("nodemailer");
 
@@ -74,8 +73,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     // secure: true,
     auth: {
       user: "nobsnfts@gmail.com", // generated ethereal user
-      // pass: process.env.EMAIL_PASSWORD, // generated ethereal password
-      pass: emailPassword
+      pass: process.env.EMAIL_PASSWORD
     },
   });
 
