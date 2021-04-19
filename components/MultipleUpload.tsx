@@ -28,6 +28,7 @@ import { errorToast, successToast } from "lib/toast";
 
 import UploadModal from "components/UploadModal";
 import useGasPrice from 'lib/useGasPrice';
+import { supportedIds } from 'lib/supportedIds';
 
 type MultipleUploadProps = {
   NFT: any;
@@ -288,7 +289,7 @@ export default function MultipleUpload({
                   ? onOpen
                   : handleMultipleTokenUpload
                 }
-                // isDisabled={(contractAddress == '' || totalFiles == 0 || (tokenAmount != '' && isNaN(parseInt(tokenAmount))) )} 
+                isDisabled={(contractAddress == '' || totalFiles == 0 || (tokenAmount != '' && isNaN(parseInt(tokenAmount))) )} 
                 border={(totalFiles != 0 && skylinksToUpload.length == totalFiles) ? "2px" : ""}
                 borderColor={(totalFiles != 0 && skylinksToUpload.length == totalFiles) ? "green.500" : ""}
                 isLoading={txLoading} 
@@ -301,8 +302,8 @@ export default function MultipleUpload({
               </Button>
               <Text>
                 {totalFiles == 0 || skylinksToUpload.length == 0
-                  ? `Est. cost of uploading 1 token: ${costEstimates.uploadTransaction} USD`
-                  : `Est. total cost of uploading: ${estimatedCost} USD`
+                  ? `Est. cost of uploading 1 token on ${supportedIds[chainId as number].name}: ${costEstimates.uploadTransaction} USD`
+                  : `Est. total cost of uploading on ${supportedIds[chainId as number].name}: ${estimatedCost} USD`
                 }
               </Text>
             </Stack>

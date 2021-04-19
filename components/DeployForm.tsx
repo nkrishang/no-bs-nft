@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   Button,
@@ -6,6 +6,7 @@ import {
   Center,
   Input,
   useToast,
+  Text
 } from '@chakra-ui/react';
 
 import { useWeb3React } from '@web3-react/core'
@@ -16,6 +17,7 @@ import { ContentWrapper } from './ContentWrapper';
 import { deployBidExecutor, deployERC721, setNFTFactory } from 'lib/deploy';
 import { supportedIds } from "lib/supportedIds";
 import { errorToast, successToast } from "lib/toast";
+import useGasPrice from "lib/useGasPrice";
 
 type DeployFormProps = {
   NFT: {abi: any, bytecode: any};
@@ -34,6 +36,19 @@ export default function DeployForm({NFT, BidExecutor, setContractAddress}: Deplo
 
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingText, setLoadingText] = useState<string>('');
+
+  const [estimatedCost, setEstimatedCost] = useState<string>('')
+  const [estimatedCostOnMatic, setEstimatedCostOnMatic] = useState<string>('');
+
+  const { costEstimates } = useGasPrice(chainId as number || 1);
+  const gasMethods = useGasPrice(137);
+
+  useEffect(() => {
+    console.log("Deploy cost estimate: ", costEstimates.deployTransaction);
+    console.log("Deploy cost estimate MATICMATIC: ", gasMethods.costEstimates.deployTransaction);
+    setEstimatedCost(costEstimates.deployTransaction)
+    setEstimatedCostOnMatic(gasMethods.costEstimates.deployTransaction);
+  })
 
   const handleTxError = (err: any) => {
     setLoading(false);
@@ -131,15 +146,23 @@ export default function DeployForm({NFT, BidExecutor, setContractAddress}: Deplo
               id="collection-symbol" 
               placeholder="E.g. 'PUNKS'"
             />
-  
-            <Button 
-              width="400px"
-              loadingText={loadingText}
-              isLoading={loading}
-              onClick={() => handleDeploy(library, account)}
-            >
-              Create collection
-            </Button>
+            
+            <Stack>
+              <Button 
+                width="400px"
+                loadingText={loadingText}
+                isLoading={loading}
+                onClick={() => handleDeploy(library, account)}
+              >
+                Create collection
+              </Button>
+              <Text>
+                {`Estimated cost of deployment on ${supportedIds[chainId as number].name}: ${estimatedCost} USD`}
+              </Text>
+              <Text hidden={chainId == 3 || chainId == 80001}>
+                Estimated cost of deployment on Matic: {estimatedCostOnMatic.length > 6 ? estimatedCostOnMatic.slice(0,6) : estimatedCostOnMatic} USD
+              </Text>
+            </Stack>
           </Stack>    
         </Center>
       </ContentWrapper>

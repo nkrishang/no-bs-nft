@@ -9,6 +9,7 @@ export default function useGasPrice(chainId: number): any {
   const [costEstimates, setCostEstimates] = useState<any>('');
 
   const uploadTransactionGas = useRef(250000);
+  const deployTransactionGas = useRef(6550000)
   
   useEffect(() => {
 
@@ -107,22 +108,36 @@ export default function useGasPrice(chainId: number): any {
     
     if(chainId == 3 || chainId == 1) {
       if(ethPrice && gasPrice) {
-        const costOfTransaction: number = (
+        const costOfUploadTransaction: number = (
           ( (uploadTransactionGas.current) * parseInt(gasPrice) * parseInt(ethPrice) ) / 10**9
         )
+
+        const costOfDeployTransaction: number = (
+          ( (deployTransactionGas.current) * parseInt(gasPrice) * parseInt(ethPrice) ) / 10**9
+        )
+
         console.log("rETH price: ", ethPrice)
+        console.log("cost of deploy tx eth: ", costOfDeployTransaction.toString())
         setCostEstimates({
-          uploadTransaction: parseInt(costOfTransaction.toString()).toString()
+          uploadTransaction: parseInt(costOfUploadTransaction.toString()).toString(),
+          deployTransaction: parseInt(costOfDeployTransaction.toString()).toString()
         })
       }
     } else if (chainId == 137 || chainId == 80001) {
       if(maticPrice && gasPrice) {
-        const costOfTransaction: number = (
+        const costOfUploadTransaction: number = (
           ( (uploadTransactionGas.current) * parseInt(gasPrice) * parseFloat(maticPrice) ) / 10**9
         )
+        
+        const costOfDeployTransaction: number = (
+          ( (deployTransactionGas.current) * parseInt(gasPrice) * parseFloat(maticPrice) ) / 10**9
+        )
+
         console.log("matic price: ", maticPrice)
+        console.log("cost of deploy tx matic: ", costOfDeployTransaction.toString())
         setCostEstimates({
-          uploadTransaction: parseFloat(costOfTransaction.toString()).toString()
+          uploadTransaction: parseInt(costOfUploadTransaction.toString()).toString(),
+          deployTransaction: (costOfDeployTransaction.toString())
         })
       }
     }
