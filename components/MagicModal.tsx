@@ -141,10 +141,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     } else {
       console.log("LOGIN UNSUCCESSFUL")
       setLoginLoading(false)
-      errorToast(
-        toast,
-        "Could not generate magic link wallet. Please use metamask."
-      )
+      setCheck(!check);
     }
   }
 

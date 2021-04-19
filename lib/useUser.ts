@@ -39,7 +39,7 @@ export default function useUser(): UserHandler {
       toast({ title: "Magic.link wallet retrieved", status: "success" });
       return true
     } else {
-      toast({ title: "Login Failed", status: "error" });
+      toast({ title: "Magic.link wallet could not be generated. Please use Metamask.", status: "error" });
       return false
     }
     // router.push("/marketplace");
