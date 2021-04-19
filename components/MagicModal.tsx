@@ -59,7 +59,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     if(user?.isLoggedIn) {
 
       let magic: any;
-
+      // magic key
       switch(chainId) {
         case 1:
           magic = new Magic(process.env.NEXT_PUBLIC_MAGIC_KEY as string)
