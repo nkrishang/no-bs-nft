@@ -46,8 +46,8 @@ export default function Account({NFTs}: any): JSX.Element {
       // ref={ref}
       position="fixed"
       padding="20px"
-      // bottom="40px"
-      right="80px"
+      top="40px"
+      right="40px"
       maxH="560px"
       width="400px"
       overflowX="hidden"

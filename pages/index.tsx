@@ -121,7 +121,7 @@ export default function App({NFT, BidExecutor}: ContractProps) {
   return (
     <>
       <div className="flex justify-between">
-        <Stack ml="16">
+        <Stack ml="8" border="2px" borderColor="red">
           <Center className="mt-16">
             <Stack>          
               <p className="text-8xl font-black mb-4">
@@ -145,11 +145,11 @@ export default function App({NFT, BidExecutor}: ContractProps) {
           </Center>
         </Stack>
 
-        <Stack mr="16" mt="16">
+        {/* <Stack border="2px" borderColor="blue"> */}
           <Account 
             NFTs={contracts}
           />
-        </Stack>
+        {/* </Stack> */}
       </div>
     </>
   )
