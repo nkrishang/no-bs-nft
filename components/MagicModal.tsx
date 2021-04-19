@@ -4,7 +4,8 @@ import {
   Button,
   Input,
   Stack,
-  HStack
+  HStack,
+  useToast
 } from "@chakra-ui/react"
 
 import useUser from 'lib/useUser';
@@ -16,6 +17,7 @@ import { ethers } from 'ethers';
 import { Magic } from 'magic-sdk';
 import useGasPrice from 'lib/useGasPrice';
 import { supportedIds } from "lib/supportedIds";
+import { errorToast } from 'lib/toast';
 
 export default function MagicModal({transactions, NFT, contractAddress, onSuccessfulTx}: any): JSX.Element {
 
@@ -38,6 +40,8 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
   const [success, setSuccess] = useState<boolean>(false);
 
   const { gasPrice, gasEstimates } = useGasPrice(chainId as number || 1);
+
+  const toast = useToast();
 
   useEffect(() => {
     console.log("USER EMAIL: ", user?.email);
@@ -109,6 +113,16 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     
   }, [contractAddress, NFT, library, account])
 
+  const handleError = (err: any) => {
+    setLoading(false)
+    setLoadingText('')
+    errorToast(
+      toast,
+      "Something went wrong. Please try again."
+    )
+    console.log(err);
+  }
+
   const handleLogout = async () => {
     setLogoutLoading(true)
     logout();
@@ -132,7 +146,6 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     setLoadingText("Deposit transaction cost in magic wallet")
     setLoading(true);
 
-    let txNonce_injected = library.getSigner(account).getTransactionCount();
     let ethToPay;
 
     try {
@@ -147,7 +160,8 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
       ethToPay = totalEther.toString();
       console.log("Gas to pay in ETH: ", totalEther.toString());
     } catch(err) {
-      console.log(err)
+      handleError(err)
+      return
     }
     console.log("ETH/MATIC to pay: ", ethToPay);
     try {
@@ -155,13 +169,13 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
       const tx1 = await library.getSigner(account as string).sendTransaction({
         to: user?.publicAddress as string,
         value: ethers.utils.parseEther(ethToPay as string),
-        // nonce: txNonce_injected
       })
-      // txNonce_injected++;
+      
       await tx1.wait()
       console.log("Transaction 1: ", tx1.hash);
     } catch(err) {
-      console.log(err);
+      handleError(err)
+      return
     }
 
     try {
@@ -175,11 +189,12 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
       await tx2.wait();
       console.log("Transaction 2: ", tx2.hash);
     } catch(err) {
-      console.log(err);
+      handleError(err)
+      return
     }
     
     let txNonce_magic = await magicSigner.getTransactionCount();
-    console.log("MATIC balance: ", await magicSigner.getBalance())
+    console.log("MAGIC SIGNER balance before: ", await magicSigner.getBalance())
     try {
       for(let i = 0; i < transactions.length; i++) {
 
@@ -193,6 +208,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
               gasLimit: 1000000,
               nonce: txNonce_magic
             })
+            console.log("MAGIC SIGNER balance after: ", await magicSigner.getBalance())
             fetch("/api/email", {
               method: "POST",
               headers: {
@@ -230,7 +246,8 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
       // })
 
     } catch(err) {
-      console.log(err)
+      handleError(err)
+      return
     }
     setSuccess(true);
     onSuccessfulTx();
@@ -241,9 +258,6 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
   return (
     <>
       <Text my="2">
-        {`
-          You need to confirm only one transaction. 
-        `}
         {`
           We ask you to deposit the total (estimated) transaction cost into your
           non-cutodial magic link wallet.

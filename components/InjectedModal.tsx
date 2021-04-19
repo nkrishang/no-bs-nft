@@ -1,13 +1,16 @@
 import {
   Text,
   Button,
-  Stack
+  Stack,
+  useToast
 } from "@chakra-ui/react"
 
 import { useWeb3React } from '@web3-react/core'
 import { Web3Provider } from '@ethersproject/providers'
 import { useEffect, useState } from "react"
 import { ethers } from "ethers"
+
+import { errorToast } from "lib/toast";
 
 export default function InjectedModal({contractAddress, NFT, transactions, onSuccessfulTx}: any): JSX.Element {
 
@@ -21,6 +24,8 @@ export default function InjectedModal({contractAddress, NFT, transactions, onSuc
   const [numOfTransactions, setNumOfTransactions] = useState<number>(0);
 
   const [success, setSuccess] = useState<boolean>(false);
+
+  const toast = useToast();
 
   const getNumOfTransactions = (): number => {
     
@@ -51,6 +56,16 @@ export default function InjectedModal({contractAddress, NFT, transactions, onSuc
     }
     
   }, [contractAddress, NFT, library, account])
+
+  const handleError = (err: any) => {
+    setLoading(false)
+    setLoadingText('')
+    errorToast(
+      toast,
+      "Something went wrong. Please try again."
+    )
+    console.log(err);
+  }
   
 
   const uploadTokensTransaction = async (library: any, account: any) => {
@@ -80,7 +95,8 @@ export default function InjectedModal({contractAddress, NFT, transactions, onSuc
 
           console.log("TX hash: ", tx.hash);
         } catch(err) {
-          console.log(err)
+          handleError(err)
+          return
         }      
       }      
     }

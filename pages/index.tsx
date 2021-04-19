@@ -77,7 +77,29 @@ export default function App({NFT, BidExecutor}: ContractProps) {
     } else {
       setContracts([]);
     }
-  }, [account, chainId])
+  }, [account])
+
+  useEffect(() => {
+    const getTxs = async () => {
+      const data = await getDataFromSkyDB();
+      if(data) {
+        if (data[account as string]) {
+          
+          if(data[account as string].NFTs) {
+            const addressesInContracts = contracts.map((contract: any) => contract.address);
+            const addressesToAdd = data[account as string].NFTs.filter((contract: any) => contract.chainId == chainId && !addressesInContracts.includes(contract.address))
+            setContracts([...addressesToAdd])
+          };
+        }
+      }
+    }
+
+    if(account && chainId) {
+      getTxs()
+    } else {
+      setContracts([]);
+    }
+  }, [chainId])
 
   const logNewContract = async (acc: string, contractAddr: string) => {
     setContracts([...contracts, {

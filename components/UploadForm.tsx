@@ -24,7 +24,7 @@ export default function UploadForm({
       <ContentWrapper>        
         <Center mt="16px" mb="8px">
           <>
-            <label htmlFor="contract-address" className="mr-4">Contract:</label>
+            <label htmlFor="contract-address" className="mr-4">NFT collection:</label>
             <Input 
               value={contractAddress}
               isInvalid={!(contractAddress == '') && !ethereum_address.isAddress(contractAddress)}
