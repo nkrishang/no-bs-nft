@@ -131,7 +131,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
   }
 
   const handleLogin = async (email: string) => {
-    setLoadingText("Getting your magic link wallet. This may take a minute.");
+    setLoadingText("Getting your magic link wallet. This may take a second.");
     setLoginLoading(true)
     const success = await login(email);
 
@@ -214,7 +214,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
 
           if(i == transactions.length - 1 && j == amount) {
             const tx = await magicContract.mint(user?.publicAddress as string, URI, {
-              gasLimit: 1000000,
+              gasLimit: gasEstimates.uploadTransaction,
               nonce: txNonce_magic
             })
             console.log("MAGIC SIGNER balance after: ", await magicSigner.getBalance())
@@ -232,7 +232,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
             })
           } else {
             const tx = magicContract.mint(user?.publicAddress as string, URI, {
-              gasLimit: 1000000,
+              gasLimit: gasEstimates.uploadTransaction,
               nonce: txNonce_magic
             })
             
