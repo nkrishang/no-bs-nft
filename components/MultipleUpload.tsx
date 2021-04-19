@@ -42,7 +42,6 @@ export default function MultipleUpload({
 
   const context = useWeb3React<Web3Provider>()
   const { chainId } = context
-  // MAGIC LINK LOGIC
 
   const { user, login } = useUser();
 

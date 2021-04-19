@@ -18,7 +18,6 @@ import UploadForm from './UploadForm';
 import DeployForm from './DeployForm';
 
 import { useDefaultSkyDB } from "lib/useSkyDB";
-import useContractCalls from 'lib/useContractCalls';
 import { supportedIds } from 'lib/supportedIds';
 import { errorToast, successToast } from "lib/toast";
 

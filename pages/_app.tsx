@@ -5,7 +5,6 @@ import { ChakraProvider } from "@chakra-ui/react"
 
 import { Web3Provider } from "@ethersproject/providers";
 import { Web3ReactProvider } from "@web3-react/core";
-import { Web3EagerConnector } from "components/Web3EagerConnector";
 
 import React from "react";
 import { MetaData } from "components/MetaData";
@@ -25,7 +24,7 @@ function App({ Component, pageProps }: AppProps): JSX.Element {
         getLibrary={getLibrary}
       >  
         <ChakraProvider>          
-          <Web3EagerConnector />
+          
           {/* <Account /> */}
           <Component {...pageProps} /> 
         </ChakraProvider>           
