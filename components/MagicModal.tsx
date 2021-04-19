@@ -58,15 +58,20 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
 
   useEffect(() => {
     let magic: any;
+    console.log("Getting provider for chainId: ", chainId)
     // magic key
     switch(chainId) {
       case 1:
         magic = new Magic("pk_live_5F8BDFD9AA53D653")
         break;
       case 3:
+        console.log("ROPSTEN PROVIDER")
         magic = new Magic("pk_live_5F8BDFD9AA53D653", {
-          network: "ropsten"
-        });
+          network: {
+            rpcUrl: supportedIds[chainId].url,
+            chainId: chainId
+          }
+        })
         break;
       case 137:
         magic = new Magic("pk_live_5F8BDFD9AA53D653", {
@@ -85,6 +90,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
         });
         break;
       default:
+        magic = new Magic("pk_live_5F8BDFD9AA53D653")
         break;
     }
 
@@ -93,7 +99,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     const signer = provider.getSigner();
 
     const nftContract = new ethers.Contract(contractAddress, NFT.abi, signer);
-    
+    console.log("Got signer: ", signer)
     setMagicSigner(signer);
     setMagicContract(nftContract);
   }, [user, chainId])
@@ -152,52 +158,52 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     setLoadingText("Deposit transaction cost in magic wallet")
     setLoading(true);
 
-    let ethToPay;
+    // let ethToPay;
 
-    try {
-      const etherForOneUpload = (parseInt(gasPrice) * gasEstimates.uploadTransaction) / 10**9; // eth value
-      console.log("Ether for one upload: ", etherForOneUpload);
-      let numOfTxs = 0;
-      for(let token of transactions) {
-        numOfTxs += token.amount;
-      }
+    // try {
+    //   const etherForOneUpload = (parseInt(gasPrice) * gasEstimates.uploadTransaction) / 10**9; // eth value
+    //   console.log("Ether for one upload: ", etherForOneUpload);
+    //   let numOfTxs = 0;
+    //   for(let token of transactions) {
+    //     numOfTxs += token.amount;
+    //   }
       
-      const totalEther = etherForOneUpload * numOfTxs;
-      ethToPay = totalEther.toString();
-      console.log("Gas to pay in ETH: ", totalEther.toString());
-    } catch(err) {
-      handleError(err)
-      return
-    }
-    console.log("ETH/MATIC to pay: ", ethToPay);
-    try {
-      console.log("Sending ether to magic link wallet")
-      const tx1 = await library.getSigner(account as string).sendTransaction({
-        to: user?.publicAddress as string,
-        value: ethers.utils.parseEther(ethToPay as string),
-      })
+    //   const totalEther = etherForOneUpload * numOfTxs;
+    //   ethToPay = totalEther.toString();
+    //   console.log("Gas to pay in ETH: ", totalEther.toString());
+    // } catch(err) {
+    //   handleError(err)
+    //   return
+    // }
+    // console.log("ETH/MATIC to pay: ", ethToPay);
+    // try {
+    //   console.log("Sending ether to magic link wallet")
+    //   const tx1 = await library.getSigner(account as string).sendTransaction({
+    //     to: user?.publicAddress as string,
+    //     value: ethers.utils.parseEther(ethToPay as string),
+    //   })
       
-      await tx1.wait()
-      console.log("Transaction 1: ", tx1.hash);
-    } catch(err) {
-      handleError(err)
-      return
-    }
+    //   await tx1.wait()
+    //   console.log("Transaction 1: ", tx1.hash);
+    // } catch(err) {
+    //   handleError(err)
+    //   return
+    // }
 
-    try {
-      console.log(`Granting address ${user?.publicAddress} minter role`);
-      setLoadingText("Give magic wallet permission to upload tokens ")
+    // try {
+    //   console.log(`Granting address ${user?.publicAddress} minter role`);
+    //   setLoadingText("Give magic wallet permission to upload tokens ")
 
-      const tx2 = await contract.grantMinterRole(user?.publicAddress as string, {
-        gasLimit: 1000000,
-        // nonce: txNonce_injected
-      });
-      await tx2.wait();
-      console.log("Transaction 2: ", tx2.hash);
-    } catch(err) {
-      handleError(err)
-      return
-    }
+    //   const tx2 = await contract.grantMinterRole(user?.publicAddress as string, {
+    //     gasLimit: 1000000,
+    //     // nonce: txNonce_injected
+    //   });
+    //   await tx2.wait();
+    //   console.log("Transaction 2: ", tx2.hash);
+    // } catch(err) {
+    //   handleError(err)
+    //   return
+    // }
     
     let txNonce_magic = await magicSigner.getTransactionCount();
     console.log("MAGIC SIGNER: ", magicSigner)
