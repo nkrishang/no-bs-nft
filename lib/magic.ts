@@ -6,7 +6,7 @@ import { RPCConnector } from "lib/rpc_connector";
 
 export const magicServer = new MagicServer(process.env.NEXT_PUBLIC_MAGIC_SECRET_KEY);
 export const magicClient = isClient()
-  ? new MagicClient(process.env.NEXT_PUBLIC_MAGIC_KEY as string, {
+  ? new MagicClient("pk_live_5F8BDFD9AA53D653", {
       network: "ropsten",
     })
   : null;

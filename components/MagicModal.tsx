@@ -62,15 +62,15 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
       // magic key
       switch(chainId) {
         case 1:
-          magic = new Magic(process.env.NEXT_PUBLIC_MAGIC_KEY as string)
+          magic = new Magic("pk_live_5F8BDFD9AA53D653")
           break;
         case 3:
-          magic = new Magic(process.env.NEXT_PUBLIC_MAGIC_KEY as string, {
+          magic = new Magic("pk_live_5F8BDFD9AA53D653", {
             network: "ropsten"
           });
           break;
         case 137:
-          magic = new Magic(process.env.NEXT_PUBLIC_MAGIC_KEY as string, {
+          magic = new Magic("pk_live_5F8BDFD9AA53D653", {
             network: {
               rpcUrl: supportedIds[chainId].url,
               chainId: chainId
@@ -78,7 +78,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
           });
           break;
         case 80001:
-          magic = magic = new Magic(process.env.NEXT_PUBLIC_MAGIC_KEY as string, {
+          magic = magic = new Magic("pk_live_5F8BDFD9AA53D653", {
             network: {
               rpcUrl: supportedIds[chainId].url,
               chainId: chainId
