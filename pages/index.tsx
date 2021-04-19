@@ -39,8 +39,6 @@ export default function App({NFT, BidExecutor}: ContractProps) {
   const context = useWeb3React<Web3Provider>()
   const { account, chainId } = context
 
-  // const { onboardUser } = useDefaultSkyDB();
-
   const { logContractAddress, getDataFromSkyDB, onboardUser } = useDefaultSkyDB();
   const [contracts, setContracts] = useState<any[]>([]);
 
@@ -120,8 +118,8 @@ export default function App({NFT, BidExecutor}: ContractProps) {
 
   return (
     <>
-      <div className="flex justify-between">
-        <Stack ml="8" border="2px" borderColor="red">
+      <div className="flex justify-center">
+        <Stack mx="8">
           <Center className="mt-16">
             <Stack>          
               <p className="text-8xl font-black mb-4">
@@ -145,11 +143,12 @@ export default function App({NFT, BidExecutor}: ContractProps) {
           </Center>
         </Stack>
 
-        {/* <Stack border="2px" borderColor="blue"> */}
+        <Stack mt="16">
+        
           <Account 
             NFTs={contracts}
           />
-        {/* </Stack> */}
+        </Stack>
       </div>
     </>
   )

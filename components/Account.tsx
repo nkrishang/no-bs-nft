@@ -37,24 +37,19 @@ export default function Account({NFTs}: any): JSX.Element {
       const bal = await library?.getBalance(account as string);
       setEthBal(ethers.utils.formatEther(bal?.toString() as string));
     }
-
+    
     if(account) getBal();
   }, [account, chainId])
 
   return (
+    <div className="sticky top-16">
     <Flex
-      // ref={ref}
-      position="fixed"
       padding="20px"
-      top="40px"
-      right="40px"
       maxH="560px"
       width="400px"
       overflowX="hidden"
       bg="white"
       borderRadius="12px"
-      // zIndex="100"
-      // boxShadow="2px 2px 2px rgba(0, 0, 0, 0.10)"
       boxShadow="md"
       border="2px"
       borderColor="gray.300"
@@ -158,5 +153,6 @@ export default function Account({NFTs}: any): JSX.Element {
         </Center>
       {/* </div> */}
     </Flex>
+    </div>
   )
 }
