@@ -25,34 +25,15 @@ import { errorToast, successToast } from "lib/toast";
 type MainFormProps = {
   NFT: {abi: any, bytecode: any};
   BidExecutor: {abi: any, bytecode: any};
+  logContractAddress: any;
 }
 
-export default function MainForm({NFT, BidExecutor}: MainFormProps): JSX.Element {
+export default function MainForm({NFT, BidExecutor, logContractAddress}: MainFormProps): JSX.Element {
 
   const context = useWeb3React<Web3Provider>()
   const { account, chainId } = context
 
-  const { logTransaction, getDataFromSkyDB } = useDefaultSkyDB();
-  const [transactions, setTransactions] = useState<string[]>([]);
   const [contractAddress, setContractAddress] = useState<string>('');
-
-  useEffect(() => {
-    const getTxs = async () => {
-      const data = await getDataFromSkyDB();
-      if(data) {
-        if (data[account as string]) {
-          
-          if(data[account as string].transactions) setTransactions([...transactions, ...data[account as string].transactions]);
-        }
-      }
-    }
-
-    if(account) {
-      getTxs()
-    } else {
-      setTransactions([]);
-    }
-  }, [account])
 
   return (
     
@@ -66,6 +47,7 @@ export default function MainForm({NFT, BidExecutor}: MainFormProps): JSX.Element
           <TabPanels>
             <TabPanel>
               <DeployForm 
+                logContractAddress={logContractAddress}
                 NFT={NFT}  
                 BidExecutor={BidExecutor}                  
                 setContractAddress={setContractAddress}
@@ -81,33 +63,7 @@ export default function MainForm({NFT, BidExecutor}: MainFormProps): JSX.Element
 
             </TabPanel>
           </TabPanels>
-        </Tabs>
-
-        {transactions.length
-
-          ? (
-            <Stack mb="16px">
-              <p className="text-2xl font-bold">Your transactions</p>
-
-              {transactions.map(txhash => {
-                return (
-                  <Link 
-                    key={txhash}
-                    isExternal
-                    href={chainId ? supportedIds[(chainId as number).toString()].explorer + txhash : ""}
-                    mx="8px"
-                  >
-                    {txhash}
-                  </Link>
-                )
-              })}
-            </Stack>
-          )
-
-          : (
-            ''
-          )
-        }
+        </Tabs>        
       </Stack>
   )
 }

@@ -149,7 +149,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     } catch(err) {
       console.log(err)
     }
-    
+    console.log("ETH/MATIC to pay: ", ethToPay);
     try {
       console.log("Sending ether to magic link wallet")
       const tx1 = await library.getSigner(account as string).sendTransaction({

@@ -91,7 +91,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
         <b>Your tokens have been successfully uploaded to your NFT collection!</b>
 
-        <span>View your collection: <a href="${supportedIds[chainId].explorer + contractAddress}">${contractAddress}</a></span>
+        <span>View your collection: <a href="${supportedIds[chainId].contractExplorer + contractAddress}">${contractAddress}</a></span>
       `, // html body
     });
 

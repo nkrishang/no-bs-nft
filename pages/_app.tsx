@@ -26,7 +26,7 @@ function App({ Component, pageProps }: AppProps): JSX.Element {
       >  
         <ChakraProvider>          
           <Web3EagerConnector />
-          <Account />
+          {/* <Account /> */}
           <Component {...pageProps} /> 
         </ChakraProvider>           
       </Web3ReactProvider>

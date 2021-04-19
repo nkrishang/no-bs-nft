@@ -5,6 +5,7 @@ import { useWeb3React } from '@web3-react/core';
 import { Web3Provider } from '@ethersproject/providers';
 
 import ConnectButton from "components/ConnectButton";
+import NFTRow from "components/NFTRow";
 
 import {
   Center, 
@@ -16,13 +17,14 @@ import {
   Text,
   Flex,
   Badge,
-  Box 
+  Box, 
+  Divider
 } from '@chakra-ui/react'
 import { ExternalLinkIcon } from "@chakra-ui/icons";
 
 import { supportedIds } from "lib/supportedIds";
 
-export default function Account(): JSX.Element {
+export default function Account({NFTs}: any): JSX.Element {
 
   const context = useWeb3React<Web3Provider>()
   const { chainId, account, library } = context
@@ -44,21 +46,25 @@ export default function Account(): JSX.Element {
       // ref={ref}
       position="fixed"
       padding="20px"
-      bottom="40px"
-      right="40px"
-      height="320px"
-      width="264px"
+      // bottom="40px"
+      right="80px"
+      maxH="560px"
+      width="400px"
       overflowX="hidden"
       bg="white"
       borderRadius="12px"
-      zIndex="100"
-      boxShadow="4px 4px 10px rgba(0, 0, 0, 0.25)"
+      // zIndex="100"
+      // boxShadow="2px 2px 2px rgba(0, 0, 0, 0.10)"
+      boxShadow="md"
+      border="2px"
+      borderColor="gray.300"
       direction="column"
       align="center"
     >
       {/* <div className="border border-black rounded-md" style={{width: "240px", height: "200px"}}> */}
         <Center>
-          <SimpleGrid rows={3} spacingY="8px">
+          <SimpleGrid rows={4} spacingY="8px">            
+            
             <Center>
               <Tooltip
                 label={hasCopied ? "Copied!" : "Copy to Clipboard"}
@@ -111,17 +117,43 @@ export default function Account(): JSX.Element {
                 <Stack>
                   <Center>
                     <p>Balance: {account ? ethBal.slice(0,5) + (chainId == 80001 || chainId == 137 ? " MATIC" : " ETH") : " -" }</p>
-                  </Center>
-                  <Link href="https://faucet.ropsten.be/" isExternal>
-                    Ropsten ether faucet <ExternalLinkIcon mx="2px" />
-                  </Link>
-                  <Link href="https://faucet.matic.network/" isExternal>
-                    Mumbai matic faucet <ExternalLinkIcon mx="2px" />
-                  </Link>
+                  </Center>                  
                 </Stack>                
               </Center>
             </Stack>
-            <ConnectButton />
+            <Center mb="4">
+              <ConnectButton />
+            </Center>
+
+            <Divider colorScheme="black"/>
+
+            <Center>
+              <Stack width="320px">
+                <Center>
+                  <p className="text-xl font-bold">
+                    Your NFT collections
+                  </p>
+                </Center>
+                
+                <Stack 
+                  maxH="280px" 
+                  overflowY="scroll"                  
+                >
+                  <Center hidden={NFTs.length > 0}>
+                    <Text>
+                      No NFTs minted with this account.
+                    </Text>
+                  </Center>
+                  {NFTs.map((NFT: any) => {
+
+                    return (
+                      <NFTRow NFTAddress={NFT.address} chainId={NFT.chainId} key={NFT.address}/>
+                    )
+                  })}
+                </Stack>
+              </Stack>
+            </Center>
+            
           </SimpleGrid>
         </Center>
       {/* </div> */}

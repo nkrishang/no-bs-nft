@@ -73,7 +73,7 @@ export default function MultipleUpload({
   const [estimatedCost, setEstimatedCost] = useState<string>('')
 
   const toast = useToast();
-  const { costEstimates } = useGasPrice(chainId as number || 1);
+  // const { costEstimates } = useGasPrice(chainId as number || 1);
 
   const revertState = () => {
     setTotalFiles(0);
@@ -87,21 +87,21 @@ export default function MultipleUpload({
     setSkylinksToUpload([]);
   }
 
-  useEffect(() => {
-    if(tokensToUpload.length > 0) {
+  // useEffect(() => {
+  //   if(tokensToUpload.length > 0) {
       
-      let numOfTxs = 0;
-      for(let token of tokensToUpload) {
-        numOfTxs += token.amount;
-      }
-      console.log("Num of txs: ", numOfTxs);
-      const cost = 
-      (costEstimates.uploadTransaction.length > 4 ? parseFloat(costEstimates.uploadTransaction.slice(0,4)) : parseFloat(costEstimates.uploadTransaction)
-      ) * numOfTxs;
-      console.log("COST: ", cost);
-      setEstimatedCost(cost.toString());
-    }
-  }, [tokensToUpload])
+  //     let numOfTxs = 0;
+  //     for(let token of tokensToUpload) {
+  //       numOfTxs += token.amount;
+  //     }
+  //     console.log("Num of txs: ", numOfTxs);
+  //     const cost = 
+  //     (costEstimates.uploadTransaction.length > 4 ? parseFloat(costEstimates.uploadTransaction.slice(0,4)) : parseFloat(costEstimates.uploadTransaction)
+  //     ) * numOfTxs;
+  //     console.log("COST: ", cost);
+  //     setEstimatedCost(cost.toString());
+  //   }
+  // }, [tokensToUpload])
 
   /// Set skynet portal
   useEffect(() => {
@@ -285,7 +285,7 @@ export default function MultipleUpload({
             />
             <Stack>
               <Button 
-                onClick={files.length == 0 || skylinksToUpload.length == files.length
+                onClick={totalFiles != 0 && skylinksToUpload.length == totalFiles
                   ? onOpen
                   : handleMultipleTokenUpload
                 }
@@ -300,12 +300,14 @@ export default function MultipleUpload({
                   : `Prepare token ${skylinksToUpload.length + 1} of ${totalFiles} for collection`
                 }
               </Button>
-              <Text>
-                {totalFiles == 0 || skylinksToUpload.length == 0
-                  ? `Est. cost of uploading 1 token on ${supportedIds[chainId as number].name}: ${costEstimates.uploadTransaction} USD`
-                  : `Est. total cost of uploading on ${supportedIds[chainId as number].name}: ${estimatedCost} USD`
+              {/* <Text>
+                {chainId
+                  ? totalFiles == 0 || skylinksToUpload.length == 0
+                    ? `Est. cost of uploading 1 token on ${supportedIds[chainId as number].name}: ${costEstimates.uploadTransaction} USD`
+                    : `Est. total cost of uploading on ${supportedIds[chainId as number].name}: ${estimatedCost} USD`
+                  : ""
                 }
-              </Text>
+              </Text> */}
             </Stack>
             
             <UploadModal 

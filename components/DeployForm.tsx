@@ -20,12 +20,13 @@ import { errorToast, successToast } from "lib/toast";
 import useGasPrice from "lib/useGasPrice";
 
 type DeployFormProps = {
+  logContractAddress:any;
   NFT: {abi: any, bytecode: any};
   BidExecutor: {abi: any, bytecode: any};
   setContractAddress: any;
 }
 
-export default function DeployForm({NFT, BidExecutor, setContractAddress}: DeployFormProps): JSX.Element {
+export default function DeployForm({logContractAddress, NFT, BidExecutor, setContractAddress}: DeployFormProps): JSX.Element {
   
   const toast = useToast();
   const context = useWeb3React<Web3Provider>()
@@ -37,18 +38,19 @@ export default function DeployForm({NFT, BidExecutor, setContractAddress}: Deplo
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingText, setLoadingText] = useState<string>('');
 
-  const [estimatedCost, setEstimatedCost] = useState<string>('')
-  const [estimatedCostOnMatic, setEstimatedCostOnMatic] = useState<string>('');
+  const [estimatedCost, setEstimatedCost] = useState<string|number>('')
+  const [estimatedCostOnMatic, setEstimatedCostOnMatic] = useState<string|number>('');
 
-  const { costEstimates } = useGasPrice(chainId as number || 1);
-  const gasMethods = useGasPrice(137);
+  // const { costEstimates } = useGasPrice(chainId as number || 1);
+  // const gasMethods = useGasPrice(137);
 
-  useEffect(() => {
-    console.log("Deploy cost estimate: ", costEstimates.deployTransaction);
-    console.log("Deploy cost estimate MATICMATIC: ", gasMethods.costEstimates.deployTransaction);
-    setEstimatedCost(costEstimates.deployTransaction)
-    setEstimatedCostOnMatic(gasMethods.costEstimates.deployTransaction);
-  })
+  // useEffect(() => {
+  //   console.log("Deploy cost estimate: ", costEstimates.deployTransaction);
+  //   console.log("Deploy cost estimate MATICMATIC: ", gasMethods.costEstimates.deployTransaction);
+
+  //   setEstimatedCost(costEstimates.deployTransaction)
+  //   setEstimatedCostOnMatic(gasMethods.costEstimates.deployTransaction);
+  // })
 
   const handleTxError = (err: any) => {
     setLoading(false);
@@ -81,7 +83,7 @@ export default function DeployForm({NFT, BidExecutor, setContractAddress}: Deplo
       
       nftAddress = address;
       setContractAddress(address);
-
+      await logContractAddress(account, address);
       setLoadingText("Tx 3 of 3: Configuring auction system");
     } catch(err) {
       handleTxError(err);
@@ -110,7 +112,7 @@ export default function DeployForm({NFT, BidExecutor, setContractAddress}: Deplo
           bidExecutor_address: bidExecutorAddress, 
           name: name,
           symbol: symbol
-        }),
+        })
       })
     }
 
@@ -156,12 +158,12 @@ export default function DeployForm({NFT, BidExecutor, setContractAddress}: Deplo
               >
                 Create collection
               </Button>
-              <Text>
-                {`Estimated cost of deployment on ${supportedIds[chainId as number].name}: ${estimatedCost} USD`}
+              {/* <Text>
+                {chainId ? `Estimated cost of deployment on ${supportedIds[chainId as number].name}: ${estimatedCost} USD` : ""}
               </Text>
               <Text hidden={chainId == 3 || chainId == 80001}>
-                Estimated cost of deployment on Matic: {estimatedCostOnMatic.length > 6 ? estimatedCostOnMatic.slice(0,6) : estimatedCostOnMatic} USD
-              </Text>
+                Estimated cost of deployment on Matic: {estimatedCostOnMatic} USD
+              </Text> */}
             </Stack>
           </Stack>    
         </Center>

@@ -82,11 +82,12 @@ export default function InjectedModal({contractAddress, NFT, transactions, onSuc
         } catch(err) {
           console.log(err)
         }      
-      }
-      setSuccess(true);
-      onSuccessfulTx();
-      setLoading(false)
+      }      
     }
+
+    setSuccess(true);
+    onSuccessfulTx();
+    setLoading(false)
   }
   return (
     <>

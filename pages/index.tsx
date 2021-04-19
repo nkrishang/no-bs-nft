@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { GetStaticProps } from 'next'
 
 import { useWeb3React } from '@web3-react/core';
@@ -16,6 +16,7 @@ import { ContentWrapper } from 'components/ContentWrapper'
 
 import { compileERC721 } from 'lib/compile';
 import { useDefaultSkyDB } from "lib/useSkyDB";
+import Account from 'components/Account';
 
 type ContractProps = {
   NFT: any;
@@ -36,11 +37,12 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
 export default function App({NFT, BidExecutor}: ContractProps) {
   const context = useWeb3React<Web3Provider>()
-  const { account } = context
+  const { account, chainId } = context
 
-  const { onboardUser } = useDefaultSkyDB();
+  // const { onboardUser } = useDefaultSkyDB();
 
-  
+  const { logContractAddress, getDataFromSkyDB, onboardUser } = useDefaultSkyDB();
+  const [contracts, setContracts] = useState<any[]>([]);
 
   useEffect(() => {
     
@@ -55,29 +57,78 @@ export default function App({NFT, BidExecutor}: ContractProps) {
     if(account) onboard(account);
   }, [account])
 
+  useEffect(() => {
+    const getTxs = async () => {
+      const data = await getDataFromSkyDB();
+      if(data) {
+        if (data[account as string]) {
+          
+          if(data[account as string].NFTs) {
+            const addressesInContracts = contracts.map((contract: any) => contract.address);
+            const addressesToAdd = data[account as string].NFTs.filter((contract: any) => contract.chainId == chainId && !addressesInContracts.includes(contract.address))
+            setContracts([...contracts, ...addressesToAdd])
+          };
+        }
+      }
+    }
+
+    if(account && chainId) {
+      getTxs()
+    } else {
+      setContracts([]);
+    }
+  }, [account, chainId])
+
+  const logNewContract = async (acc: string, contractAddr: string) => {
+    setContracts([...contracts, {
+      address: contractAddr,
+      chainId: chainId
+    }])
+
+    console.log("Loggin new contract: ", contractAddr);
+    try {
+      await logContractAddress(acc, {
+        address: contractAddr,
+        chainId: chainId
+      })
+    } catch(err) {
+      console.log(err)
+    }
+  }
+
   return (
     <>
-      <ContentWrapper>
+      <div className="flex justify-between">
+        <Stack ml="16">
+          <Center className="mt-16">
+            <Stack>          
+              <p className="text-8xl font-black mb-4">
+                No bullshit NFT.
+              </p>                                      
+              <p  className="text-3xl font-light">
+                Mint an individual NFT or a collection without the extra platform bullshit.
+              </p>
+              <Link href="https://github.com/nkrishang/no-bs-nft" isExternal>
+                  Source code <ExternalLinkIcon mx="2px" />
+              </Link>
+            </Stack>        
+          </Center>
 
-        <Center className="mt-16">
-          <Stack>          
-            <p className="text-8xl font-black mb-4">
-              No bullshit NFT.
-            </p>                                      
-            <p  className="text-3xl font-light">
-              Mint an individual NFT or a collection without the extra platform bullshit.
-            </p>
-            <Link href="https://github.com/nkrishang/no-bs-nft" isExternal>
-                Source code <ExternalLinkIcon mx="2px" />
-            </Link>
-          </Stack>        
-        </Center>
+          <Center className="mt-8">
+            <MainForm 
+              NFT={NFT} 
+              BidExecutor={BidExecutor} 
+              logContractAddress={logNewContract}
+            />     
+          </Center>
+        </Stack>
 
-        <Center className="mt-8">
-          <MainForm NFT={NFT} BidExecutor={BidExecutor} />     
-        </Center>
-
-      </ContentWrapper>
+        <Stack mr="16" mt="16">
+          <Account 
+            NFTs={contracts}
+          />
+        </Stack>
+      </div>
     </>
   )
 }

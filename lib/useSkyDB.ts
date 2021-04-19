@@ -4,7 +4,7 @@ import { genKeyPairFromSeed, SkynetClient } from "skynet-js";
 // Hook with default skyDB settings
 export function useDefaultSkyDB(): any {
   return useSkyDB(
-    "transaction",
+    "transactions and NFTs",
     process.env.NEXT_PUBLIC_SKYDB_SEED || ""
   );
 }
@@ -103,6 +103,7 @@ export default function useSkyDB(dataKey: string, seed: string): any {
         ...data,
         [publicAddress]: {
           transactions: [],
+          NFTs: []
         },
       };
 
@@ -157,6 +158,32 @@ export default function useSkyDB(dataKey: string, seed: string): any {
     }
   };
 
+  // Add transaction log to DB
+  const logContractAddress = async (publicAddress: string, contractAddress: any) => {
+    const data = await getDataFromSkyDB();
+    console.log("ZZZ data: ", data)
+    console.log("PADRR: ", publicAddress)
+    console.log("Logging contract")
+    if (data != undefined && data[publicAddress] != undefined) {
+      const field = data[publicAddress].NFTs;
+      const logs = field && field.length ? field : [];
+
+      const document = {
+        ...data,
+        [publicAddress]: {
+          ...data[publicAddress],
+          NFTs: [...logs, contractAddress],
+        },
+      };
+
+      console.log("New document: ", document)
+
+      await uploadToSkyDB(document);
+    } else {
+      console.log("Error: that public address is not in the database");
+    }
+  };
+
   return {
     getDataFromSkyDB,
     getUser,
@@ -164,5 +191,6 @@ export default function useSkyDB(dataKey: string, seed: string): any {
     onboardUser,
     updateUser,
     logTransaction,
+    logContractAddress
   };
 }
