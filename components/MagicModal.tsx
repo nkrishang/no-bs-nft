@@ -167,37 +167,37 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     setLoadingText("Deposit transaction cost in magic wallet")
     setLoading(true);
 
-    let ethToPay;
+    // let ethToPay;
 
-    try {
-      const etherForOneUpload = (parseInt(gasPrice) * gasEstimates.uploadTransaction) / 10**9; // eth value
-      // console.log("Ether for one upload: ", etherForOneUpload);
-      let numOfTxs = 0;
-      for(let token of transactions) {
-        numOfTxs += token.amount;
-      }
+    // try {
+    //   const etherForOneUpload = (parseInt(gasPrice) * gasEstimates.uploadTransaction) / 10**9; // eth value
+    //   // console.log("Ether for one upload: ", etherForOneUpload);
+    //   let numOfTxs = 0;
+    //   for(let token of transactions) {
+    //     numOfTxs += token.amount;
+    //   }
       
-      const totalEther = etherForOneUpload * numOfTxs;
-      ethToPay = totalEther.toString();
-      // console.log("Gas to pay in ETH: ", totalEther.toString());
-    } catch(err) {
-      handleError(err)
-      return
-    }
-    console.log("ETH/MATIC to pay: ", ethToPay);
-    try {
-      // console.log("Sending ether to magic link wallet")
-      const tx1 = await library.getSigner(account as string).sendTransaction({
-        to: user?.publicAddress as string,
-        value: ethers.utils.parseEther(ethToPay as string),
-      })
+    //   const totalEther = etherForOneUpload * numOfTxs;
+    //   ethToPay = totalEther.toString();
+    //   // console.log("Gas to pay in ETH: ", totalEther.toString());
+    // } catch(err) {
+    //   handleError(err)
+    //   return
+    // }
+    // console.log("ETH/MATIC to pay: ", ethToPay);
+    // try {
+    //   // console.log("Sending ether to magic link wallet")
+    //   const tx1 = await library.getSigner(account as string).sendTransaction({
+    //     to: user?.publicAddress as string,
+    //     value: ethers.utils.parseEther(ethToPay as string),
+    //   })
       
-      await tx1.wait()
-      console.log("Transaction 1: ", tx1.hash);
-    } catch(err) {
-      handleError(err)
-      return
-    }
+    //   await tx1.wait()
+    //   console.log("Transaction 1: ", tx1.hash);
+    // } catch(err) {
+    //   handleError(err)
+    //   return
+    // }
 
     try {
       // console.log(`Granting address ${user?.publicAddress} minter role`);
@@ -218,7 +218,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     console.log("MAGIC SIGNER: ", magicSigner)
     console.log("MAGIC SIGNER balance before: ", await magicSigner.getBalance())
 
-    console.log("TRANSACTIONS: ", transactions);
+    setLoadingText("Uploading tokens. This might take a minute.")
     try {
       for(let i = 0; i < transactions.length; i++) {
 
@@ -228,7 +228,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
           console.log("Helllllo")                    
 
           if(i == transactions.length - 1 && j == amount) {
-            const tx = magicContract.mint(user?.publicAddress as string, URI, {
+            const tx = await magicContract.mint(user?.publicAddress as string, URI, {
               gasLimit: gasEstimates.uploadTransaction,
               nonce: txNonce_magic,
               gasPrice: ethers.utils.parseUnits(gasPrice, "gwei")
