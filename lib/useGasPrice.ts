@@ -8,7 +8,7 @@ export default function useGasPrice(chainId: number): any {
   // const [maticPrice, setMaticPrice] = useState<string>('');
   // const [costEstimates, setCostEstimates] = useState<any>('');
 
-  const uploadTransactionGas = useRef(250000);
+  const uploadTransactionGas = useRef(300000);
   const deployTransactionGas = useRef(6550000)
   
   useEffect(() => {

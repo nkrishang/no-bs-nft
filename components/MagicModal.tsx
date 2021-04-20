@@ -102,7 +102,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     console.log("Got signer: ", signer)
     setMagicSigner(signer);
     setMagicContract(nftContract);
-  }, [user, chainId])
+  }, [chainId])
 
   useEffect(() => {
     if(library && account) {
@@ -129,22 +129,31 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
 
   const handleLogout = async () => {
     setLogoutLoading(true)
-    logout();
+    try {
+      await logout();
+    } catch(err) {
+      handleError(err);
+    }
     setLogoutLoading(false)
   }
 
   const handleLogin = async (email: string) => {
     setLoadingText("Getting your magic link wallet. This may take a second.");
     setLoginLoading(true)
-    const success = await login(email);
+    let success
+    try {
+      success = await login(email);
+    } catch(err) {
+      handleError(err);
+    }
 
     if(success) {
       console.log("LOGIN SUCCESS")
-      setCheck(!check);
+      setCheck(true);
     } else {
       console.log("LOGIN UNSUCCESSFUL")
       setLoginLoading(false)
-      setCheck(!check);
+      setCheck(true);
     }
   }
 
@@ -162,7 +171,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
 
     try {
       const etherForOneUpload = (parseInt(gasPrice) * gasEstimates.uploadTransaction) / 10**9; // eth value
-      console.log("Ether for one upload: ", etherForOneUpload);
+      // console.log("Ether for one upload: ", etherForOneUpload);
       let numOfTxs = 0;
       for(let token of transactions) {
         numOfTxs += token.amount;
@@ -170,14 +179,14 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
       
       const totalEther = etherForOneUpload * numOfTxs;
       ethToPay = totalEther.toString();
-      console.log("Gas to pay in ETH: ", totalEther.toString());
+      // console.log("Gas to pay in ETH: ", totalEther.toString());
     } catch(err) {
       handleError(err)
       return
     }
     console.log("ETH/MATIC to pay: ", ethToPay);
     try {
-      console.log("Sending ether to magic link wallet")
+      // console.log("Sending ether to magic link wallet")
       const tx1 = await library.getSigner(account as string).sendTransaction({
         to: user?.publicAddress as string,
         value: ethers.utils.parseEther(ethToPay as string),
@@ -191,7 +200,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     }
 
     try {
-      console.log(`Granting address ${user?.publicAddress} minter role`);
+      // console.log(`Granting address ${user?.publicAddress} minter role`);
       setLoadingText("Give magic wallet permission to upload tokens ")
 
       const tx2 = await contract.grantMinterRole(user?.publicAddress as string, {
@@ -214,14 +223,15 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
         const { URI, amount } = transactions[i];
         
         for(let j = 1; j <= amount; j++) {
-          console.log("Helllllo")                    
+          // console.log("Helllllo")                    
 
           if(i == transactions.length - 1 && j == amount) {
             const tx = await magicContract.mint(user?.publicAddress as string, URI, {
               gasLimit: gasEstimates.uploadTransaction,
-              nonce: txNonce_magic
+              nonce: txNonce_magic,
+              gasPrice: ethers.utils.parseUnits(gasPrice, "gwei")
             })
-            console.log("MAGIC SIGNER balance after: ", await magicSigner.getBalance())
+            // console.log("MAGIC SIGNER balance after: ", await magicSigner.getBalance())
             fetch("/api/email", {
               method: "POST",
               headers: {
@@ -240,7 +250,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
               nonce: txNonce_magic
             })
             
-            console.log("complete")
+            // console.log("complete")
             txNonce_magic++
           }
         }

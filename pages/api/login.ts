@@ -44,7 +44,7 @@ export default withSession(
       const magicUser = await getAuthorizedUser(token, provider);
 
       const user = { isLoggedIn: true, ...magicUser };
-
+      console.log("Loggin in user: ", user)
       // Set session key (used in user.ts)
       req.session.set(SESSION_KEY, user);
       await req.session.save();
