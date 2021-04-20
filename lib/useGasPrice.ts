@@ -34,7 +34,7 @@ export default function useGasPrice(chainId: number): any {
         setGasPrice('150');
         break;
       case 3:
-        setGasPrice('100');
+        setGasPrice('50');
         break;
       case 80001:
         setGasPrice('200')
