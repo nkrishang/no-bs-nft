@@ -112,7 +112,7 @@ export default function App({NFT, BidExecutor}: ContractProps) {
                     Source code
                 </Link>
                 <Link href="https://twitter.com/NFTLabsHQ" isExternal>
-                    Built with NFT Labs
+                    {"Built with @NFTLabsHQ"}
                 </Link>
               </HStack>
             </Stack>        
