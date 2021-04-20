@@ -46,14 +46,17 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   console.log("Provider: ", provider);
 
   let txReceiptReceived = false;
+  let count = 0;
 
   while(!txReceiptReceived) {
+    count += 1;
+    if(count >= 60) break;
 
     const receiptPromise = new Promise((resolve, reject) => {
       console.log("Checking")
       setTimeout(() => {
         resolve('');
-      }, 1000)
+      }, 5000)
     })
 
     const receipt = await provider.getTransactionReceipt(txHash);
@@ -77,20 +80,30 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     },
   });
 
+  const successHTML = `
+    <h1>No bullshit NFTs</h1>
+
+    <b>Your tokens have been successfully uploaded to your NFT collection!</b>
+
+    <span>View your collection: <a href="${supportedIds[chainId].contractExplorer + contractAddress}">${contractAddress}</a></span>`
+  const successSubject = "Your transactions on NoBullshitNFTs are complete!";
+
+  const failureHTML = `
+  <h1>No bullshit NFTs</h1>
+
+  <b>Sorry, but looks like something went wrong with your transactions. You can contact krishang@nftlas.co for support.</b>
+
+  <span>View your collection: <a href="${supportedIds[chainId].contractExplorer + contractAddress}">${contractAddress}</a></span>`
+  const failureSubject = "Something went wrong with your transactions on NoBullshitNFTs."
+
   try {
 
     let info = await transporter.sendMail({
       from: '"Krishang" <nobsnfts@gmail.com>', // sender address
       to: `${email}`, // list of receivers
-      subject: `Your transactions on NoBullshitNFTs are complete!`, // Subject line
-      text: `Your transactions on NoBullshitNFTs are complete!`, // plain text body
-      html: `
-        <h1>No bullshit NFTs</h1>
-
-        <b>Your tokens have been successfully uploaded to your NFT collection!</b>
-
-        <span>View your collection: <a href="${supportedIds[chainId].contractExplorer + contractAddress}">${contractAddress}</a></span>
-      `, // html body
+      subject: txReceiptReceived ? successSubject : failureSubject, // Subject line
+      text: txReceiptReceived ? successSubject : failureSubject, // plain text body
+      html: txReceiptReceived ? successHTML : failureHTML, // html body
     });
 
     console.log("Message sent: %s", info.messageId);
