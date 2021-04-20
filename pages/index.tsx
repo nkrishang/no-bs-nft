@@ -12,11 +12,11 @@ import {
 import { ExternalLinkIcon } from "@chakra-ui/icons";
 
 import MainForm from 'components/MainForm';
-import { ContentWrapper } from 'components/ContentWrapper'
+import Account from 'components/Account';
 
 import { compileERC721 } from 'lib/compile';
 import { useDefaultSkyDB } from "lib/useSkyDB";
-import Account from 'components/Account';
+
 
 type ContractProps = {
   NFT: any;
@@ -75,29 +75,7 @@ export default function App({NFT, BidExecutor}: ContractProps) {
     } else {
       setContracts([]);
     }
-  }, [account])
-
-  useEffect(() => {
-    const getTxs = async () => {
-      const data = await getDataFromSkyDB();
-      if(data) {
-        if (data[account as string]) {
-          
-          if(data[account as string].NFTs) {
-            const addressesInContracts = contracts.map((contract: any) => contract.address);
-            const addressesToAdd = data[account as string].NFTs.filter((contract: any) => contract.chainId == chainId && !addressesInContracts.includes(contract.address))
-            setContracts([...addressesToAdd])
-          };
-        }
-      }
-    }
-
-    if(account && chainId) {
-      getTxs()
-    } else {
-      setContracts([]);
-    }
-  }, [chainId])
+  }, [account, chainId])
 
   const logNewContract = async (acc: string, contractAddr: string) => {
     setContracts([...contracts, {
@@ -105,7 +83,7 @@ export default function App({NFT, BidExecutor}: ContractProps) {
       chainId: chainId
     }])
 
-    console.log("Loggin new contract: ", contractAddr);
+    // console.log("Loggin new contract: ", contractAddr);
     try {
       await logContractAddress(acc, {
         address: contractAddr,
@@ -119,7 +97,7 @@ export default function App({NFT, BidExecutor}: ContractProps) {
   return (
     <>
       <div className="flex justify-center">
-        <Stack mx="8">
+        <Stack ml="4">
           <Center className="mt-16">
             <Stack>          
               <p className="text-8xl font-black mb-4">
@@ -143,8 +121,7 @@ export default function App({NFT, BidExecutor}: ContractProps) {
           </Center>
         </Stack>
 
-        <Stack mt="16">
-        
+        <Stack mx="12" mt="16">        
           <Account 
             NFTs={contracts}
           />

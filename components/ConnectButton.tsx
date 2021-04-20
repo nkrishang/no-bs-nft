@@ -7,10 +7,9 @@ import {
 } from '@web3-react/injected-connector'
 import { Web3Provider } from '@ethersproject/providers'
 
-import { injected } from 'lib/connectors'
-
 import { Button, useToast } from '@chakra-ui/react';
 import { infoToast } from 'lib/toast';
+import { injected } from 'lib/connectors'
 
 export default function ConnectButton(): JSX.Element {
 

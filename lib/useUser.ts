@@ -77,7 +77,7 @@ export default function useUser(): UserHandler {
         return user;
       }
     });
-    console.log("result on mutate", result);
+    // console.log("result on mutate", result);
     setUser(result);
     // router.push("/login");
   }
@@ -112,7 +112,7 @@ export default function useUser(): UserHandler {
         }
 
         if (!isMagicLoggedIn) {
-          console.log("Forced logged out by unsynced auth state");
+          // console.log("Forced logged out by unsynced auth state");
           logout();
         } else if (!Object.keys(user).includes("username")) {
           // router.push("/onboarding");

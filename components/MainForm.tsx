@@ -6,9 +6,7 @@ import {
   TabList,
   TabPanels,
   Tab,
-  TabPanel,
-  Link,
-  useToast,
+  TabPanel
 } from '@chakra-ui/react';
 
 import { useWeb3React } from '@web3-react/core'
@@ -16,10 +14,6 @@ import { Web3Provider } from '@ethersproject/providers'
 
 import UploadForm from './UploadForm';
 import DeployForm from './DeployForm';
-
-import { useDefaultSkyDB } from "lib/useSkyDB";
-import { supportedIds } from 'lib/supportedIds';
-import { errorToast, successToast } from "lib/toast";
 
 type MainFormProps = {
   NFT: {abi: any, bytecode: any};

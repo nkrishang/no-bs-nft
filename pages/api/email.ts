@@ -7,11 +7,9 @@ const nodemailer = require("nodemailer");
 export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   const { email, txHash, contractAddress, chainId } = req.body;
-  console.log("TX: ", txHash);
-  console.log("Waiting for final transaction to resolve.")
 
   let provider: any;
-  console.log("ChainID :", chainId)
+  
   switch(chainId) {
     case 1:
       provider = new ethers.providers.JsonRpcProvider(
@@ -43,8 +41,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       );
   }
 
-  console.log("Provider: ", provider);
-
   let txReceiptReceived = false;
   let count = 0;
 
@@ -73,9 +69,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     service: "Gmail",
-    // secure: true,
+    
     auth: {
-      user: "nobsnfts@gmail.com", // generated ethereal user
+      user: "nobsnfts@gmail.com",
       pass: process.env.EMAIL_PASSWORD
     },
   });
@@ -107,12 +103,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     console.log("Message sent: %s", info.messageId);
+    console.log(`Email sent to ${email}`);
 
   } catch(err) {
     console.log(err);
   }
-
-  console.log("Sent email!");
 
   res.end();
 }

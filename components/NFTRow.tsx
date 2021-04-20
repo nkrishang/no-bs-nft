@@ -29,8 +29,6 @@ export default function NFTRow({NFTAddress, chainId}: any): JSX.Element {
           <Flex
             onClick={onCopy}
             borderRadius="8px"
-            // height="70px"
-            // width="140px"
             direction="column"
             align="center"
             justify="center"

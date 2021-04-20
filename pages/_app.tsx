@@ -8,7 +8,6 @@ import { Web3ReactProvider } from "@web3-react/core";
 
 import React from "react";
 import { MetaData } from "components/MetaData";
-import Account from "components/Account";
 
 function getLibrary(provider: any): Web3Provider {
   const library = new Web3Provider(provider);
@@ -23,9 +22,7 @@ function App({ Component, pageProps }: AppProps): JSX.Element {
       <Web3ReactProvider 
         getLibrary={getLibrary}
       >  
-        <ChakraProvider>          
-          
-          {/* <Account /> */}
+        <ChakraProvider>                    
           <Component {...pageProps} /> 
         </ChakraProvider>           
       </Web3ReactProvider>

@@ -3,13 +3,8 @@ import { useEffect, useState } from 'react';
 import { ethers } from 'ethers'
 import { useWeb3React } from '@web3-react/core';
 import { Web3Provider } from '@ethersproject/providers';
-
-import ConnectButton from "components/ConnectButton";
-import NFTRow from "components/NFTRow";
-
 import {
   Center, 
-  Link, 
   SimpleGrid, 
   Stack,
   Tooltip,
@@ -20,7 +15,9 @@ import {
   Box, 
   Divider
 } from '@chakra-ui/react'
-import { ExternalLinkIcon } from "@chakra-ui/icons";
+
+import ConnectButton from "components/ConnectButton";
+import NFTRow from "components/NFTRow";
 
 import { supportedIds } from "lib/supportedIds";
 
@@ -46,7 +43,7 @@ export default function Account({NFTs}: any): JSX.Element {
     <Flex
       padding="20px"
       maxH="560px"
-      width="400px"
+      // width="400px"
       overflowX="hidden"
       bg="white"
       borderRadius="12px"

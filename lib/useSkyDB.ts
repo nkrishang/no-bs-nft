@@ -35,7 +35,7 @@ export default function useSkyDB(dataKey: string, seed: string): any {
         document
       );
 
-      console.log("Uploading to SkyDB: ", document);
+      // console.log("Uploading to SkyDB: ", document);
     } catch (error) {
       console.log(error);
     }
@@ -50,8 +50,8 @@ export default function useSkyDB(dataKey: string, seed: string): any {
         dataKey
       );
 
-      console.log("Data from SkyDB: ", data);
-      console.log("Revisions to SkyDB: ", revision);
+      // console.log("Data from SkyDB: ", data);
+      // console.log("Revisions to SkyDB: ", revision);
 
       return data;
     } catch (error) {
@@ -66,9 +66,9 @@ export default function useSkyDB(dataKey: string, seed: string): any {
     if (Object.keys(data).includes(publicAddress)) {
       return data[publicAddress];
     } else {
-      console.log(
-        "Error: there is no user with that public address in the database"
-      );
+      // console.log(
+      //   "Error: there is no user with that public address in the database"
+      // );
       return null;
     }
   };
@@ -89,7 +89,7 @@ export default function useSkyDB(dataKey: string, seed: string): any {
         publicAddress,
       };
     } else {
-      console.log("Error: there is no user with that username in the database");
+      // console.log("Error: there is no user with that username in the database");
     }
   };
 
@@ -109,7 +109,7 @@ export default function useSkyDB(dataKey: string, seed: string): any {
 
       await uploadToSkyDB(document);
     } else {
-      console.log("Error: that public address is already in the database");
+      // console.log("Error: that public address is already in the database");
     }
   };
 
@@ -132,7 +132,7 @@ export default function useSkyDB(dataKey: string, seed: string): any {
 
       await uploadToSkyDB(document);
     } else {
-      console.log("Error: that public addess is not in the database");
+      // console.log("Error: that public addess is not in the database");
     }
   };
 
@@ -154,7 +154,7 @@ export default function useSkyDB(dataKey: string, seed: string): any {
 
       await uploadToSkyDB(document);
     } else {
-      console.log("Error: that public address is not in the database");
+      // console.log("Error: that public address is not in the database");
     }
   };
 
@@ -176,11 +176,11 @@ export default function useSkyDB(dataKey: string, seed: string): any {
         },
       };
 
-      console.log("New document: ", document)
+      // console.log("New document: ", document)
 
       await uploadToSkyDB(document);
     } else {
-      console.log("Error: that public address is not in the database");
+      // console.log("Error: that public address is not in the database");
     }
   };
 

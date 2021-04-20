@@ -28,6 +28,7 @@ export default function useGasPrice(chainId: number): any {
     //   }
     // }
     
+    // TEMPORARY -- hard coded gas prices.
     switch (chainId) {
       case 1:
         // getGasPrice()

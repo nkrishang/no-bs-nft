@@ -27,8 +27,6 @@ import { uploadMetadataToSkynet } from "lib/skynet";
 import { errorToast, successToast } from "lib/toast";
 
 import UploadModal from "components/UploadModal";
-import useGasPrice from 'lib/useGasPrice';
-import { supportedIds } from 'lib/supportedIds';
 
 type MultipleUploadProps = {
   NFT: any;
@@ -39,15 +37,6 @@ export default function MultipleUpload({
   NFT,
   contractAddress 
 }: MultipleUploadProps): JSX.Element {
-
-  const context = useWeb3React<Web3Provider>()
-  const { chainId } = context
-
-  const { user, login } = useUser();
-
-  useEffect(() => {
-    // Once you get user, save public key in state and use that for non custodial transactions
-  }, [user])
 
   const skyPortalRef = useRef<any>();
   const [files, setFiles] = useState<File[]>([]);
@@ -69,7 +58,7 @@ export default function MultipleUpload({
   const [skylinksToUpload, setSkylinksToUpload] = useState<string[]>([]);
   const [tokensToUpload, setTokensToUpload] = useState<any>([]);
 
-  const [estimatedCost, setEstimatedCost] = useState<string>('')
+  // const [estimatedCost, setEstimatedCost] = useState<string>('')
 
   const toast = useToast();
   // const { costEstimates } = useGasPrice(chainId as number || 1);

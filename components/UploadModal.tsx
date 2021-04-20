@@ -1,21 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Button,
-  Stack,
-  Center,
-  Input,
-  Textarea,
-  Flex,
-  Spinner,
   Text,
-  SimpleGrid,
-  useToast,
-  useDisclosure,
   Modal,
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalFooter,
   ModalBody,
   ModalCloseButton,
   Accordion,
@@ -25,13 +14,11 @@ import {
   AccordionIcon,
   Box,
   Link,
-  HStack,
-  Badge
+  HStack
 } from '@chakra-ui/react';
 
 import InjectedModal from "components/InjectedModal";
 import MagicModal from "components/MagicModal";
-import useUser from 'lib/useUser';
 
 export default function UploadModal({transactions, NFT, contractAddress, modalParams, onSuccessfulTx}: any): JSX.Element {
 
