@@ -223,12 +223,12 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
       for(let i = 0; i < transactions.length; i++) {
 
         const { URI, amount } = transactions[i];
-        
+        console.log("TOKEN AMT: ", amount)
         for(let j = 1; j <= amount; j++) {
           console.log("Helllllo")                    
 
           if(i == transactions.length - 1 && j == amount) {
-            const tx = await magicContract.mint(user?.publicAddress as string, URI, {
+            const tx = magicContract.mint(user?.publicAddress as string, URI, {
               gasLimit: gasEstimates.uploadTransaction,
               nonce: txNonce_magic,
               gasPrice: ethers.utils.parseUnits(gasPrice, "gwei")
