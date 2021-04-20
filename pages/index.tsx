@@ -6,6 +6,7 @@ import { Web3Provider } from '@ethersproject/providers';
 
 import {
   Center, 
+  HStack, 
   Link, 
   Stack
 } from '@chakra-ui/react'
@@ -98,7 +99,7 @@ export default function App({NFT, BidExecutor}: ContractProps) {
     <>
       <div className="flex justify-center">
         <Stack ml="4">
-          <Center className="mt-16">
+          <Center className="mt-16" mb="4">
             <Stack>          
               <p className="text-8xl font-black mb-4">
                 No bullshit NFT.
@@ -106,9 +107,14 @@ export default function App({NFT, BidExecutor}: ContractProps) {
               <p  className="text-3xl font-light">
                 Mint an individual NFT or a collection without the extra platform bullshit.
               </p>
-              <Link href="https://github.com/nkrishang/no-bs-nft" isExternal>
-                  Source code <ExternalLinkIcon mx="2px" />
-              </Link>
+              <HStack>
+                <Link href="https://github.com/nkrishang/no-bs-nft" isExternal mr="8">
+                    Source code
+                </Link>
+                <Link href="https://twitter.com/NFTLabsHQ" isExternal>
+                    Built with NFT Labs
+                </Link>
+              </HStack>
             </Stack>        
           </Center>
 

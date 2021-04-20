@@ -48,12 +48,12 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     console.log("USER PUBLIC ADDR: ", user?.publicAddress)
 
     if(user?.isLoggedIn) {
-      console.log("Checking logged in user")
+      // console.log("Checking logged in user")
       setEmail(user.email as string)
       setLoginLoading(false)
     }
 
-    console.log("Checking")
+    // console.log("Checking")
   }, [user, check])
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
         magic = new Magic("pk_live_5F8BDFD9AA53D653")
         break;
       case 3:
-        console.log("ROPSTEN PROVIDER")
+        // console.log("ROPSTEN PROVIDER")
         magic = new Magic("pk_live_5F8BDFD9AA53D653", {
           network: {
             rpcUrl: supportedIds[chainId].url,
@@ -99,7 +99,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     const signer = provider.getSigner();
 
     const nftContract = new ethers.Contract(contractAddress, NFT.abi, signer);
-    console.log("Got signer: ", signer)
+    // console.log("Got signer: ", signer)
     setMagicSigner(signer);
     setMagicContract(nftContract);
   }, [chainId])
@@ -167,37 +167,37 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     setLoadingText("Deposit transaction cost in magic wallet")
     setLoading(true);
 
-    // let ethToPay;
+    let ethToPay;
 
-    // try {
-    //   const etherForOneUpload = (parseInt(gasPrice) * gasEstimates.uploadTransaction) / 10**9; // eth value
-    //   // console.log("Ether for one upload: ", etherForOneUpload);
-    //   let numOfTxs = 0;
-    //   for(let token of transactions) {
-    //     numOfTxs += token.amount;
-    //   }
+    try {
+      const etherForOneUpload = (parseInt(gasPrice) * gasEstimates.uploadTransaction) / 10**9; // eth value
+      // console.log("Ether for one upload: ", etherForOneUpload);
+      let numOfTxs = 0;
+      for(let token of transactions) {
+        numOfTxs += token.amount;
+      }
       
-    //   const totalEther = etherForOneUpload * numOfTxs;
-    //   ethToPay = totalEther.toString();
-    //   // console.log("Gas to pay in ETH: ", totalEther.toString());
-    // } catch(err) {
-    //   handleError(err)
-    //   return
-    // }
-    // console.log("ETH/MATIC to pay: ", ethToPay);
-    // try {
-    //   // console.log("Sending ether to magic link wallet")
-    //   const tx1 = await library.getSigner(account as string).sendTransaction({
-    //     to: user?.publicAddress as string,
-    //     value: ethers.utils.parseEther(ethToPay as string),
-    //   })
+      const totalEther = etherForOneUpload * numOfTxs;
+      ethToPay = totalEther.toString();
+      // console.log("Gas to pay in ETH: ", totalEther.toString());
+    } catch(err) {
+      handleError(err)
+      return
+    }
+    console.log("ETH/MATIC to pay: ", ethToPay);
+    try {
+      // console.log("Sending ether to magic link wallet")
+      const tx1 = await library.getSigner(account as string).sendTransaction({
+        to: user?.publicAddress as string,
+        value: ethers.utils.parseEther(ethToPay as string),
+      })
       
-    //   await tx1.wait()
-    //   console.log("Transaction 1: ", tx1.hash);
-    // } catch(err) {
-    //   handleError(err)
-    //   return
-    // }
+      await tx1.wait()
+      console.log("Transaction 1: ", tx1.hash);
+    } catch(err) {
+      handleError(err)
+      return
+    }
 
     try {
       // console.log(`Granting address ${user?.publicAddress} minter role`);
@@ -208,6 +208,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
         // nonce: txNonce_injected
       });
       await tx2.wait();
+      setLoadingText("Giving magic wallet permission to upload tokens ")
       console.log("Transaction 2: ", tx2.hash);
     } catch(err) {
       handleError(err)
@@ -215,17 +216,17 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     }
     
     let txNonce_magic = await magicSigner.getTransactionCount();
-    console.log("MAGIC SIGNER: ", magicSigner)
-    console.log("MAGIC SIGNER balance before: ", await magicSigner.getBalance())
+    // console.log("MAGIC SIGNER: ", magicSigner)
+    // console.log("MAGIC SIGNER balance before: ", await magicSigner.getBalance())
 
     setLoadingText("Uploading tokens. This might take a minute.")
     try {
       for(let i = 0; i < transactions.length; i++) {
 
         const { URI, amount } = transactions[i];
-        console.log("TOKEN AMT: ", amount)
+        // console.log("TOKEN AMT: ", amount)
         for(let j = 1; j <= amount; j++) {
-          console.log("Helllllo")                    
+          // console.log("Helllllo")                    
 
           if(i == transactions.length - 1 && j == amount) {
             const tx = await magicContract.mint(user?.publicAddress as string, URI, {
