@@ -217,13 +217,15 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     let txNonce_magic = await magicSigner.getTransactionCount();
     console.log("MAGIC SIGNER: ", magicSigner)
     console.log("MAGIC SIGNER balance before: ", await magicSigner.getBalance())
+
+    console.log("TRANSACTIONS: ", transactions);
     try {
       for(let i = 0; i < transactions.length; i++) {
 
         const { URI, amount } = transactions[i];
         
         for(let j = 1; j <= amount; j++) {
-          // console.log("Helllllo")                    
+          console.log("Helllllo")                    
 
           if(i == transactions.length - 1 && j == amount) {
             const tx = await magicContract.mint(user?.publicAddress as string, URI, {
@@ -247,7 +249,8 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
           } else {
             const tx = magicContract.mint(user?.publicAddress as string, URI, {
               gasLimit: gasEstimates.uploadTransaction,
-              nonce: txNonce_magic
+              nonce: txNonce_magic,
+              gasPrice: ethers.utils.parseUnits(gasPrice, "gwei")
             })
             
             // console.log("complete")

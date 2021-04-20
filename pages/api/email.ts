@@ -87,7 +87,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   const failureHTML = `
   <h1>No bullshit NFTs</h1>
 
-  <b>Sorry, but looks like something went wrong with your transactions. You can contact krishang@nftlas.co for support.</b>
+  <b>Sorry, but looks like something went wrong with your transactions. You can contact krishang@nftlabs.co for support.</b>
 
   <span>View your collection: <a href="${supportedIds[chainId].contractExplorer + contractAddress}">${contractAddress}</a></span>`
   const failureSubject = "Something went wrong with your transactions on NoBullshitNFTs."

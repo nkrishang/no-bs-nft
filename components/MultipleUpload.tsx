@@ -283,7 +283,7 @@ export default function MultipleUpload({
                 isLoading={txLoading} 
                 loadingText={txLoadingText}
               >
-                {files.length == 0 || skylinksToUpload.length == files.length
+                { totalFiles == 0 || (totalFiles != 0 && skylinksToUpload.length == totalFiles)
                   ? "Upload all tokens to your NFT collection"
                   : `Prepare token ${skylinksToUpload.length + 1} of ${totalFiles} for collection`
                 }
