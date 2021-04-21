@@ -10,7 +10,7 @@ import {
   Link, 
   Stack
 } from '@chakra-ui/react'
-import { ExternalLinkIcon } from "@chakra-ui/icons";
+import { ExternalLinkIcon, EmailIcon } from "@chakra-ui/icons";
 
 import MainForm from 'components/MainForm';
 import Account from 'components/Account';
@@ -123,11 +123,18 @@ export default function App({NFT, BidExecutor}: ContractProps) {
           </Center> */}
 
           <Center>
-            <MainForm 
-              NFT={NFT} 
-              BidExecutor={BidExecutor} 
-              logContractAddress={logNewContract}
-            />     
+            <Stack>
+              <Center mb="16">
+                <p className="text-2xl text-gray-600 font-light">
+                  Create and manage an NFT collection without the extra bullshit.
+                </p>
+              </Center>
+              <MainForm 
+                NFT={NFT} 
+                BidExecutor={BidExecutor} 
+                logContractAddress={logNewContract}
+              />
+            </Stack>     
           </Center>
         </Stack>
       </ContentWrapper>
