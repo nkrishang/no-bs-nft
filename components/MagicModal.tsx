@@ -242,7 +242,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
           if(i == transactions.length - 1 && j == amount) {    
             finaltx = tx;
             console.log("Final tx before: ", finaltx)
-            
+            setLoadingText("Your transactions are being mined. Don't close this window.")
             await finaltx;
             console.log("Final tx after: ", finaltx)
 
