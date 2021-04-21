@@ -9,9 +9,10 @@ import {
   Text,
   Flex,
   Badge,
-  Box 
+  Box, 
+  HStack
 } from '@chakra-ui/react'
-import { ExternalLinkIcon } from "@chakra-ui/icons";
+import { ExternalLinkIcon, CopyIcon } from "@chakra-ui/icons";
 import { supportedIds } from "lib/supportedIds";
 
 export default function NFTRow({NFTAddress, chainId}: any): JSX.Element {
@@ -37,11 +38,21 @@ export default function NFTRow({NFTAddress, chainId}: any): JSX.Element {
               bg: "#EEE",
             }}
           >
-            {NFTAddress.slice(0,6) + "..." + NFTAddress.slice(-6)}
+            <HStack>
+              <CopyIcon/> 
+              <p>
+                {NFTAddress.slice(0,6) + "..." + NFTAddress.slice(-3)}
+              </p>              
+            </HStack>
           </Flex>
         </Tooltip>
         <Link href={supportedIds[chainId].contractExplorer + NFTAddress} isExternal>
-          Code <ExternalLinkIcon />
+          <HStack>
+            <p>
+              Code
+            </p>
+            <ExternalLinkIcon />
+          </HStack>
         </Link>
       </div>
     </Center>

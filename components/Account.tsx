@@ -81,7 +81,7 @@ export default function Account({NFTs}: any): JSX.Element {
                   </Text>
                   <Text color="#999">
                     {account 
-                      ? (account as string).slice(0,6) + "..." + (account as string).slice(-3)                         
+                      ? (account as string).slice(0,6) + "..." + (account as string).slice(-6)                         
                       : "-"
                     }
                   </Text>

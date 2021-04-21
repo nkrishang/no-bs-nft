@@ -17,6 +17,9 @@ import Account from 'components/Account';
 
 import { compileERC721 } from 'lib/compile';
 import { useDefaultSkyDB } from "lib/useSkyDB";
+import { ContentWrapper } from 'components/ContentWrapper';
+import Navbar from 'components/Navbar';
+import CollectionList from 'components/CollectionList';
 
 
 type ContractProps = {
@@ -97,9 +100,10 @@ export default function App({NFT, BidExecutor}: ContractProps) {
 
   return (
     <>
-      <div className="flex justify-center">
-        <Stack ml="4">
-          <Center className="mt-16" mb="4">
+      <Navbar />
+      <ContentWrapper>
+        <Stack className="mt-16">
+          {/* <Center className="mt-16" mb="4">
             <Stack>          
               <p className="text-8xl font-black mb-4">
                 No bullshit NFT.
@@ -116,9 +120,9 @@ export default function App({NFT, BidExecutor}: ContractProps) {
                 </Link>
               </HStack>
             </Stack>        
-          </Center>
+          </Center> */}
 
-          <Center className="mt-8">
+          <Center>
             <MainForm 
               NFT={NFT} 
               BidExecutor={BidExecutor} 
@@ -126,13 +130,9 @@ export default function App({NFT, BidExecutor}: ContractProps) {
             />     
           </Center>
         </Stack>
-
-        <Stack mx="12" mt="16">        
-          <Account 
-            NFTs={contracts}
-          />
-        </Stack>
-      </div>
+      </ContentWrapper>
+      
+      <CollectionList NFTs={contracts}/>
     </>
   )
 }
