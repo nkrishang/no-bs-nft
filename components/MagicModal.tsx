@@ -19,6 +19,8 @@ import useGasPrice from 'lib/useGasPrice';
 import { supportedIds } from "lib/supportedIds";
 import { errorToast } from 'lib/toast';
 
+import {parse, stringify} from 'flatted';
+
 export default function MagicModal({transactions, NFT, contractAddress, onSuccessfulTx}: any): JSX.Element {
 
   const context = useWeb3React<Web3Provider>()
@@ -29,6 +31,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
 
   const [contract, setContract] = useState<any>('');
   const [magicContract, setMagicContract] = useState<any>('');
+  const [magicProvider, setMagicProvider] = useState<any>('');
   const [magicSigner, setMagicSigner] = useState<any>('');
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -100,6 +103,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
 
     const nftContract = new ethers.Contract(contractAddress, NFT.abi, signer);
     // console.log("Got signer: ", signer)
+    setMagicProvider(provider);
     setMagicSigner(signer);
     setMagicContract(nftContract);
   }, [chainId])
@@ -215,47 +219,46 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
       return
     }
     
-    let txNonce_magic = await magicSigner.getTransactionCount();
-    // console.log("MAGIC SIGNER: ", magicSigner)
-    // console.log("MAGIC SIGNER balance before: ", await magicSigner.getBalance())
-
+    let txNonce_magic = parseInt((await magicSigner.getTransactionCount()).toString());
     setLoadingText("Uploading tokens. This might take a minute.")
+    console.log("TX COUNTS: ", parseInt((await magicSigner.getTransactionCount()).toString()));
+
+    let finaltx
     try {
-      for(let i = 0; i < transactions.length; i++) {
-
+      for(let i = 0; i < transactions.length; i++) {    
         const { URI, amount } = transactions[i];
-        // console.log("TOKEN AMT: ", amount)
+        
         for(let j = 1; j <= amount; j++) {
-          // console.log("Helllllo")                    
+          console.log("Helllllo")
+                          
 
-          if(i == transactions.length - 1 && j == amount) {
-            const tx = await magicContract.mint(user?.publicAddress as string, URI, {
-              gasLimit: gasEstimates.uploadTransaction,
-              nonce: txNonce_magic,
-              gasPrice: ethers.utils.parseUnits(gasPrice, "gwei")
-            })
-            // console.log("MAGIC SIGNER balance after: ", await magicSigner.getBalance())
-            fetch("/api/email", {
+          const tx = magicContract.mint(user?.publicAddress as string, URI, {
+            gasLimit: gasEstimates.uploadTransaction,
+            nonce: txNonce_magic,
+            gasPrice: ethers.utils.parseUnits(gasPrice, "gwei")
+          })
+          txNonce_magic++;
+
+          if(i == transactions.length - 1 && j == amount) {    
+            finaltx = tx;
+            console.log("Final tx before: ", finaltx)
+            
+            await finaltx;
+            console.log("Final tx after: ", finaltx)
+
+            fetch("/api/magicUpload", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
                 email: user?.email,
-                txHash: tx.hash,
+                publicAddress: user?.publicAddress,
                 contractAddress: contractAddress,
-                chainId: chainId
+                chainId: chainId,
+                txNonce: txNonce_magic
               })
             })
-          } else {
-            const tx = magicContract.mint(user?.publicAddress as string, URI, {
-              gasLimit: gasEstimates.uploadTransaction,
-              nonce: txNonce_magic,
-              gasPrice: ethers.utils.parseUnits(gasPrice, "gwei")
-            })
-            
-            // console.log("complete")
-            txNonce_magic++
           }
         }
       }

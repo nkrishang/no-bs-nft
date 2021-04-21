@@ -6,8 +6,8 @@ const nodemailer = require("nodemailer");
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
 
-  const { email, txHash, contractAddress, chainId } = req.body;
-
+  const { email, publicAddress, contractAddress, chainId, txNonce } = req.body;
+  
   let provider: any;
   
   switch(chainId) {
@@ -41,12 +41,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       );
   }
 
-  let txReceiptReceived = false;
+  let txConfirmed = false;
   let count = 0;
-
-  while(!txReceiptReceived) {
+  console.log("Nonce to check for: ", txNonce);
+  
+  while(!txConfirmed) {
     count += 1;
-    if(count >= 60) break;
+    if(count >= 120) break;
 
     const receiptPromise = new Promise((resolve, reject) => {
       console.log("Checking")
@@ -55,11 +56,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       }, 5000)
     })
 
-    const receipt = await provider.getTransactionReceipt(txHash);
+    const newNonce = await provider.getTransactionCount(publicAddress);
+    const formatted = parseInt(newNonce.toString());
+    console.log("New nonce on checking: " , formatted);
 
-    if(receipt != null) {
-      txReceiptReceived = true;
-      console.log(receipt.status == 1 ? "Transaction succesful!" : "Transaction reverted");
+    if(newNonce >= txNonce) {
+      txConfirmed = true;
+      console.log("Transaction mined!")
     } else {
       await receiptPromise;
     }
@@ -97,9 +100,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     let info = await transporter.sendMail({
       from: '"Krishang" <nobsnfts@gmail.com>', // sender address
       to: `${email}`, // list of receivers
-      subject: txReceiptReceived ? successSubject : failureSubject, // Subject line
-      text: txReceiptReceived ? successSubject : failureSubject, // plain text body
-      html: txReceiptReceived ? successHTML : failureHTML, // html body
+      subject: txConfirmed ? successSubject : failureSubject, // Subject line
+      text: txConfirmed ? successSubject : failureSubject, // plain text body
+      html: txConfirmed ? successHTML : failureHTML, // html body
     });
 
     console.log("Message sent: %s", info.messageId);

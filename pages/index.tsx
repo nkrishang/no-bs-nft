@@ -65,7 +65,7 @@ export default function App({NFT, BidExecutor}: ContractProps) {
           if(data[account as string].NFTs) {
             const addressesInContracts = contracts.map((contract: any) => contract.address);
             const addressesToAdd = data[account as string].NFTs.filter((contract: any) => contract.chainId == chainId && !addressesInContracts.includes(contract.address))
-            setContracts([...contracts, ...addressesToAdd])
+            setContracts([...addressesToAdd])
           };
         }
       }
