@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useContext } from 'react';
 import { ethers } from 'ethers'
 import { Magic } from 'magic-sdk';
 import {
@@ -30,6 +30,7 @@ import useGasPrice from 'lib/useGasPrice';
 import { supportedIds } from "lib/supportedIds";
 
 import UploadModal from "components/UploadModal";
+import { ContractContext } from 'lib/AppContext';
 
 type MultipleUploadProps = {
   NFT: any;
@@ -204,6 +205,7 @@ export default function MultipleUpload({
 
   const { user } = useUser();
 
+  const [contract, setContract] = useState<any>('');
   const [magicContract, setMagicContract] = useState<any>('');
   const [magicSigner, setMagicSigner] = useState<any>('');
 
@@ -212,63 +214,24 @@ export default function MultipleUpload({
   const [magicSuccess, setMagicSuccess] = useState<boolean>(false);
 
   const [transact, setTransact] = useState<boolean>(false);
+  const [transactionParams, setTransactionParams] = useState<any>('');
 
   const { gasPrice, gasEstimates } = useGasPrice(chainId as number || 1);
+
+  const { setUploadTokenLoading } = useContext(ContractContext); 
 
   useEffect(() => {
 
     const performTransaction = async () => {
-      await uploadTokensTransaction(library, account)
+      const {userPublicAddr, userEmail} = transactionParams;
+      console.log(userPublicAddr, userEmail)
+
+      await uploadTokensTransaction(library, account, userPublicAddr, userEmail)
       setTransact(false);
     }
 
     if(transact) performTransaction();
   }, [transact])
-
-  // useEffect(() => {
-  //   if(chainId) {
-  //     console.log("ENS name: ", supportedIds[chainId as number].url)
-  //     let magic: any;
-      
-  //     try {
-  //       magic = new Magic("pk_live_5F8BDFD9AA53D653", {
-  //         network: {
-  //           rpcUrl: supportedIds[chainId as number].url,
-  //           chainId: chainId
-  //         }
-  //       })
-  //     } catch(err) {
-  //       handleError(err)
-  //       return
-  //     }
-
-  //     console.log("Getting provider for chainId: ", chainId)
-
-  //     const rpc: any = magic.rpcProvider
-  //     const provider = new ethers.providers.Web3Provider(rpc);
-  //     const signer = provider.getSigner();
-
-  //     const nftContract = new ethers.Contract(contractAddress, NFT.abi, signer);
-  //     // console.log("Got signer: ", signer)
-  //     setMagicSigner(signer);
-  //     setMagicContract(nftContract);
-  //   }
-  // }, [chainId])
-
-  useEffect(() => {
-    if(library && account && contractAddress) {
-      // console.log("ABI: ", NFT.abi, "contract addr: ", contractAddress)
-      try {
-        const nftContract = new ethers.Contract(contractAddress, NFT.abi, library?.getSigner(account as string))
-        setMagicContract(nftContract);
-        console.log("hello")
-      } catch(err) {
-        handleError(err)
-        return
-      }
-    }
-    
-  }, [contractAddress, NFT, library, account])
 
   const handleError = (err: any) => {
     errorToast(toast, "Sorry, something went wrong. Please try again");
@@ -285,14 +248,44 @@ export default function MultipleUpload({
     console.log(err);
   }
 
-  const handleTransaction = async () => {
+  const handleTransaction = async (userPublicAddr: string, userEmail: string, signer:any) => {
+    setMagicSigner(signer)
+
+    try {
+      const nftContract = new ethers.Contract(contractAddress, NFT.abi, signer)
+      setMagicContract(nftContract);
+      console.log("hello")
+    } catch(err) {
+      handleError(err)
+      return
+    }
+
+    setTransactionParams({
+      userPublicAddr, userEmail
+    })
     setTransact(true);
   }
 
-  const uploadTokensTransaction = async (library: any, account:any) => {
+  useEffect(() => {
+    if(library && account && contractAddress) {
+      // console.log("ABI: ", NFT.abi, "contract addr: ", contractAddress)
+      try {
+        const nftContract = new ethers.Contract(contractAddress, NFT.abi, library?.getSigner(account as string))
+        setContract(nftContract);
+        console.log("hello")
+      } catch(err) {
+        handleError(err)
+        return
+      }
+    }
+    
+  }, [contractAddress, NFT, library, account])
+
+  const uploadTokensTransaction = async (library: any, account:any, userPublicAddr: string, userEmail: string) => {
 
     setMagicLoadingText("Deposit transaction cost in magic wallet")
     setMagicLoading(true);
+    setUploadTokenLoading(true);
 
     let ethToPay;
 
@@ -313,9 +306,9 @@ export default function MultipleUpload({
     }
     console.log("ETH/MATIC to pay: ", ethToPay);
     try {
-      console.log("Sending ether to magic link wallet: ", user?.publicAddress as string )
+      console.log("Sending ether to magic link wallet: ", userPublicAddr )
       const tx1 = await library.getSigner(account as string).sendTransaction({
-        to: user?.publicAddress as string,
+        to: userPublicAddr,
         value: ethers.utils.parseEther(ethToPay as string),
       })
       
@@ -330,7 +323,7 @@ export default function MultipleUpload({
       // console.log(`Granting address ${user?.publicAddress} minter role`);
       setMagicLoadingText("Give magic wallet permission to upload tokens ")
 
-      const tx2 = await magicContract.grantMinterRole(user?.publicAddress as string, {
+      const tx2 = await contract.grantMinterRole(userPublicAddr, {
         gasLimit: 1000000,
         // nonce: txNonce_injected
       });
@@ -355,7 +348,7 @@ export default function MultipleUpload({
           console.log("Helllllo")
                           
 
-          const tx = magicContract.mint(user?.publicAddress as string, URI, {
+          const tx = magicContract.mint(userPublicAddr, URI, {
             gasLimit: gasEstimates.uploadTransaction,
             nonce: txNonce_magic,
             gasPrice: ethers.utils.parseUnits(gasPrice, "gwei")
@@ -375,8 +368,8 @@ export default function MultipleUpload({
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                email: user?.email,
-                publicAddress: user?.publicAddress,
+                email: userEmail,
+                publicAddress: userPublicAddr,
                 contractAddress: contractAddress,
                 chainId: chainId,
                 txNonce: txNonce_magic
@@ -405,6 +398,7 @@ export default function MultipleUpload({
     setMagicSuccess(true);
     revertState()
     setMagicLoading(false)
+    setUploadTokenLoading(false);
     setMagicLoadingText('')
   }
   
