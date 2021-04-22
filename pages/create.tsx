@@ -6,9 +6,7 @@ import {
   Center,
   Input,
   useToast,
-  Text,
-  Link,
-  HStack
+  Link
 } from '@chakra-ui/react';
 
 import { useWeb3React } from '@web3-react/core'
@@ -19,29 +17,14 @@ import { ContentWrapper } from 'components/ContentWrapper';
 import { deployBidExecutor, deployERC721, setNFTFactory } from 'lib/deploy';
 import { supportedIds } from "lib/supportedIds";
 import { errorToast, successToast } from "lib/toast";
-import useGasPrice from "lib/useGasPrice";
+// import useGasPrice from "lib/useGasPrice";
 
 import { ContractContext } from "lib/AppContext";
 
-import { GetStaticProps } from 'next'
-import { compileERC721 } from 'lib/compile';
 
-export const getStaticProps: GetStaticProps = async (context) => {
-
-  const {NFT, BidExecutor} = await compileERC721();
-
-  return {
-    props: {
-      NFT,
-      BidExecutor
-    }
-  }
-}
-
-
-export default function DeployForm({NFT, BidExecutor}: any): JSX.Element {
+export default function DeployForm(): JSX.Element {
   
-  const { logNewContract, setContractAddress, handleNewContract } = useContext(ContractContext);
+  const { logNewContract, setContractAddress, handleNewContract, NFT, BidExecutor } = useContext(ContractContext);
 
   const toast = useToast();
   const context = useWeb3React<Web3Provider>()

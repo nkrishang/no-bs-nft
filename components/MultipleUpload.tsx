@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef, useContext } from 'react';
 import { ethers } from 'ethers'
-import { Magic } from 'magic-sdk';
 import {
   Button,
   Stack,
@@ -25,9 +24,8 @@ import { Web3Provider } from '@ethersproject/providers'
 import { ContentRenderer } from "./ContentRenderer"; 
 
 import { uploadMetadataToSkynet } from "lib/skynet";
-import { errorToast, successToast } from "lib/toast";
+import { errorToast } from "lib/toast";
 import useGasPrice from 'lib/useGasPrice';
-import { supportedIds } from "lib/supportedIds";
 
 import UploadModal from "components/UploadModal";
 import { ContractContext } from 'lib/AppContext';

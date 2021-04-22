@@ -1,23 +1,12 @@
-import 'tailwindcss/tailwind.css'
-
-import { AppProps } from "next/app";
-import { ChakraProvider } from "@chakra-ui/react"
-
 import { Web3Provider } from "@ethersproject/providers";
-import { Web3ReactProvider } from "@web3-react/core";
-
 import { useWeb3React } from '@web3-react/core';
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { MetaData } from "components/MetaData";
-
-import { GetStaticProps } from 'next'
-import { compileERC721 } from 'lib/compile';
 import { useDefaultSkyDB } from "lib/useSkyDB";
 
 export const ContractContext = createContext<any>('');
 
-export function ContractWrapper({ children }: any) {
+export function ContractWrapper({ NFT, BidExecutor, children }: any) {
   
   const context = useWeb3React<Web3Provider>()
   const { account, chainId } = context
@@ -96,6 +85,8 @@ export function ContractWrapper({ children }: any) {
   }
 
   let sharedState = {
+    NFT, 
+    BidExecutor,
     contracts,
     setContracts,
     logNewContract,

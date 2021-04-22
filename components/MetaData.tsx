@@ -1,5 +1,4 @@
-  
-import Head from "next/head";
+  import Head from "next/head";
 
 const TITLE = "No bullshit NFTs";
 const DESCRIPTION = "Mint an individual NFT or a collection without the extra platform bullshit.";

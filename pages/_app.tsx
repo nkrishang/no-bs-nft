@@ -15,31 +15,32 @@ import { Web3EagerConnector } from "components/Web3EagerConnector";
 import { GetStaticProps } from 'next'
 import { compileERC721 } from 'lib/compile';
 import { useDefaultSkyDB } from "lib/useSkyDB";
+import { ContractWrapper } from "lib/AppContext";
 
-import { ContractContext, ContractWrapper } from "lib/AppContext";
-import Navbar from 'components/Navbar';
-import CollectionList  from 'components/CollectionList';
+import NavbarWrapper from "components/NavbarWrapper";
 
 function getLibrary(provider: any): Web3Provider {
   const library = new Web3Provider(provider);
   return library;
 }
 
-function NavbarWrapper({ children }: any): JSX.Element {
+export const getStaticProps: GetStaticProps = async (context) => {
 
-  const { contracts } = useContext(ContractContext);
+  const {NFT, BidExecutor} = await compileERC721();
 
-  return (
-    <>
-      <Navbar />
-      {children}
-      <CollectionList NFTs={contracts}/>
-    </>
-  )
+  return {
+    props: {
+      NFT,
+      BidExecutor
+    }
+  }
 }
 
-function App({ Component, pageProps }: AppProps): JSX.Element {
-
+function App({ NFT, BidExecutor, Component, pageProps }: any): JSX.Element {
+  console.log(
+    `NFT: ${NFT}`,
+    `BE: ${BidExecutor}`
+  )
   return (
     <>
       <MetaData />
@@ -48,7 +49,7 @@ function App({ Component, pageProps }: AppProps): JSX.Element {
       >  
         <ChakraProvider>   
           <Web3EagerConnector />
-          <ContractWrapper>
+          <ContractWrapper NFT={NFT} BidExecutor={BidExecutor}>
             <NavbarWrapper>
               <Component {...pageProps} /> 
             </NavbarWrapper>

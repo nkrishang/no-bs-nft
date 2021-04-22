@@ -15,11 +15,8 @@ import { Web3Provider } from '@ethersproject/providers'
 
 import { ethers } from 'ethers';
 import { Magic } from 'magic-sdk';
-import useGasPrice from 'lib/useGasPrice';
 import { supportedIds } from "lib/supportedIds";
 import { errorToast } from 'lib/toast';
-
-import {parse, stringify} from 'flatted';
 import { ContractContext } from 'lib/AppContext';
 
 export default function MagicModal({magicLoading, handleMagicError, handleTransaction, magicLoadingText, magicSuccess}: any): JSX.Element {
