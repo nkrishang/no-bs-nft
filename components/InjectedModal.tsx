@@ -7,10 +7,11 @@ import {
 
 import { useWeb3React } from '@web3-react/core'
 import { Web3Provider } from '@ethersproject/providers'
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { ethers } from "ethers"
 
 import { errorToast } from "lib/toast";
+import { ContractContext } from "lib/AppContext"
 
 export default function InjectedModal({contractAddress, NFT, transactions, onSuccessfulTx}: any): JSX.Element {
 
@@ -18,7 +19,7 @@ export default function InjectedModal({contractAddress, NFT, transactions, onSuc
   const { account, library } = context
 
   const [loading, setLoading] = useState<boolean>(false)
-  const [loadingText, setLoadingText] = useState<string>('');
+  const [loadingText, setLoadingText] = useState<string>('Uploading tokens. This may take a minute.');
 
   const [contract, setContract] = useState<any>('');
   const [numOfTransactions, setNumOfTransactions] = useState<number>(0);
@@ -26,6 +27,8 @@ export default function InjectedModal({contractAddress, NFT, transactions, onSuc
   const [success, setSuccess] = useState<boolean>(false);
 
   const toast = useToast();
+
+  const { uploadTokenLoading, setUploadTokenLoading} = useContext(ContractContext);
 
   const getNumOfTransactions = (): number => {
     
@@ -72,6 +75,7 @@ export default function InjectedModal({contractAddress, NFT, transactions, onSuc
     
     setLoadingText("Uploading tokens")
     setLoading(true)
+    setUploadTokenLoading(true)
 
     const numOfTokens = transactions.length
     let txNumber = 1;
@@ -104,6 +108,8 @@ export default function InjectedModal({contractAddress, NFT, transactions, onSuc
     setSuccess(true);
     onSuccessfulTx();
     setLoading(false)
+    setUploadTokenLoading(false)
+    setLoadingText('Uploading tokens. This may take a minute.');
   }
   return (
     <>
@@ -115,11 +121,10 @@ export default function InjectedModal({contractAddress, NFT, transactions, onSuc
 
       <Stack>
         <Button 
-          onClick={() => uploadTokensTransaction(library, account)}
-          isLoading={loading}
+          onClick={!success ? () => uploadTokensTransaction(library, account) : () => {}}
+          isLoading={loading || uploadTokenLoading}
           loadingText={loadingText}
           colorScheme={success ? "green" : "gray"}
-          isDisabled={success}
         >
           {success
             ? `All tokens have been uploaded to your NFT collection!`

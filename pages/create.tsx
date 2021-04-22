@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 
 import {
   Button,
@@ -6,28 +6,40 @@ import {
   Center,
   Input,
   useToast,
-  Text
+  Link
 } from '@chakra-ui/react';
 
 import { useWeb3React } from '@web3-react/core'
 import { Web3Provider } from '@ethersproject/providers'
 
-import { ContentWrapper } from './ContentWrapper';
+import { ContentWrapper } from 'components/ContentWrapper';
 
 import { deployBidExecutor, deployERC721, setNFTFactory } from 'lib/deploy';
 import { supportedIds } from "lib/supportedIds";
 import { errorToast, successToast } from "lib/toast";
-import useGasPrice from "lib/useGasPrice";
+// import useGasPrice from "lib/useGasPrice";
 
-type DeployFormProps = {
-  logContractAddress:any;
-  NFT: {abi: any, bytecode: any};
-  BidExecutor: {abi: any, bytecode: any};
-  setContractAddress: any;
+import { ContractContext } from "lib/AppContext";
+
+import { GetStaticProps } from 'next'
+import { compileERC721 } from 'lib/compile';
+
+export const getStaticProps: GetStaticProps = async (context) => {
+
+  const {NFT, BidExecutor} = await compileERC721();
+
+  return {
+    props: {
+      NFT,
+      BidExecutor
+    }
+  }
 }
 
-export default function DeployForm({logContractAddress, NFT, BidExecutor, setContractAddress}: DeployFormProps): JSX.Element {
+export default function DeployForm({NFT, BidExecutor}: any): JSX.Element {
   
+  const { logNewContract, setContractAddress, handleNewContract } = useContext(ContractContext);
+
   const toast = useToast();
   const context = useWeb3React<Web3Provider>()
   const { library, account, chainId } = context
@@ -38,8 +50,9 @@ export default function DeployForm({logContractAddress, NFT, BidExecutor, setCon
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingText, setLoadingText] = useState<string>('');
 
-  const [estimatedCost, setEstimatedCost] = useState<string|number>('')
-  const [estimatedCostOnMatic, setEstimatedCostOnMatic] = useState<string|number>('');
+
+  // const [estimatedCost, setEstimatedCost] = useState<string|number>('')
+  // const [estimatedCostOnMatic, setEstimatedCostOnMatic] = useState<string|number>('');
 
   // const { costEstimates } = useGasPrice(chainId as number || 1);
   // const gasMethods = useGasPrice(137);
@@ -83,8 +96,10 @@ export default function DeployForm({logContractAddress, NFT, BidExecutor, setCon
       
       nftAddress = address;
       setContractAddress(address);
-      await logContractAddress(account, address);
+      await logNewContract(account, address);
       setLoadingText("Tx 3 of 3: Configuring auction system");
+      await handleNewContract();
+
     } catch(err) {
       handleTxError(err);
       return
@@ -116,6 +131,7 @@ export default function DeployForm({logContractAddress, NFT, BidExecutor, setCon
       })
     }
 
+
     successToast(
       toast, 
       `Your NFT collection has been created on ${supportedIds[chainId as number].name}.`
@@ -130,6 +146,39 @@ export default function DeployForm({logContractAddress, NFT, BidExecutor, setCon
   return (
     <>
       <ContentWrapper>
+      <Center mb="8">					
+					<Stack>
+						<p className="text-2xl text-gray-800 font-normal">
+							Create an NFT collection!
+						</p>
+
+            <span>
+              {`Here's one of our `} <Link href="https://thecryptopoops.com/" isExternal color="blue.500">favourites.</Link>
+            </span>          
+												
+						<span>
+							<span className="font-bold text-lg">
+								{`1. `} 
+							</span>
+							Give your collection a name and symbol.
+						</span>		
+
+						<span>
+							<span className="font-bold text-lg">
+								{`2. `} 
+							</span>
+								Done! Pay the transaction costs and create your NFT collection.   
+						</span>
+
+            <span>
+							<span className="font-bold text-lg">
+								{`3. `} 
+							</span>
+								Your NFT collection comes with a built in auction system. (The interface for it is being built!)   
+						</span>																	
+					</Stack>	
+				</Center> 
+
         <Center className="mt-8">
           <Stack>
 
@@ -150,7 +199,8 @@ export default function DeployForm({logContractAddress, NFT, BidExecutor, setCon
             />
             
             <Stack>
-              <Button 
+              <Button
+                isDisabled={!account} 
                 width="400px"
                 loadingText={loadingText}
                 isLoading={loading}

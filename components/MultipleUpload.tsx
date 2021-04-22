@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-
+import React, { useEffect, useState, useCallback, useRef, useContext } from 'react';
+import { ethers } from 'ethers'
 import {
   Button,
   Stack,
@@ -24,18 +24,20 @@ import { Web3Provider } from '@ethersproject/providers'
 import { ContentRenderer } from "./ContentRenderer"; 
 
 import { uploadMetadataToSkynet } from "lib/skynet";
-import { errorToast, successToast } from "lib/toast";
+import { errorToast } from "lib/toast";
+import useGasPrice from 'lib/useGasPrice';
 
 import UploadModal from "components/UploadModal";
+import { ContractContext } from 'lib/AppContext';
 
 type MultipleUploadProps = {
   NFT: any;
-  contractAddress: string
+  contractAddress: string;
 }
 
 export default function MultipleUpload({
   NFT,
-  contractAddress 
+  contractAddress
 }: MultipleUploadProps): JSX.Element {
 
   const skyPortalRef = useRef<any>();
@@ -56,8 +58,8 @@ export default function MultipleUpload({
 
   const [tokenAmount, setTokenAmount] = useState<string>('');
   const [skylinksToUpload, setSkylinksToUpload] = useState<string[]>([]);
-  const [tokensToUpload, setTokensToUpload] = useState<any>([]);
-
+  const [tokensToUpload, setTokensToUpload] = useState<any>([]); // move to upload form
+ 
   // const [estimatedCost, setEstimatedCost] = useState<string>('')
 
   const toast = useToast();
@@ -153,11 +155,6 @@ export default function MultipleUpload({
     }
   }
 
-  const handleError = (err: any) => {
-    errorToast(toast, "Sorry, something went wrong. Please try again");
-    console.log(err)
-  }
-
   const handleMultipleTokenUpload = async () => {
     setTxLoadingText('Uploading to decentralized storage')
     setTxLoading(true);
@@ -199,6 +196,210 @@ export default function MultipleUpload({
     setTxLoading(false);
     setTxLoadingText('');
   }
+
+  /// MAGIC MODAL LOGIC
+  const context = useWeb3React<Web3Provider>()
+  const { account, library, chainId } = context
+
+  const { user } = useUser();
+
+  const [contract, setContract] = useState<any>('');
+  const [magicContract, setMagicContract] = useState<any>('');
+  const [magicSigner, setMagicSigner] = useState<any>('');
+
+  const [magicLoading, setMagicLoading] = useState<boolean>(false);
+  const [magicLoadingText, setMagicLoadingText] = useState<string>('');
+  const [magicSuccess, setMagicSuccess] = useState<boolean>(false);
+
+  const [transact, setTransact] = useState<boolean>(false);
+  const [transactionParams, setTransactionParams] = useState<any>('');
+
+  const { gasPrice, gasEstimates } = useGasPrice(chainId as number || 1);
+
+  const { setUploadTokenLoading } = useContext(ContractContext); 
+
+  useEffect(() => {
+
+    const performTransaction = async () => {
+      const {userPublicAddr, userEmail} = transactionParams;
+      console.log(userPublicAddr, userEmail)
+
+      await uploadTokensTransaction(library, account, userPublicAddr, userEmail)
+      setTransact(false);
+    }
+
+    if(transact) performTransaction();
+  }, [transact])
+
+  const handleError = (err: any) => {
+    errorToast(toast, "Sorry, something went wrong. Please try again");
+    console.log(err)
+  }
+
+  const handleMagicError = (err: any) => {
+    setMagicLoading(false)
+    setUploadTokenLoading(false)
+    setMagicLoadingText('')
+    errorToast(
+      toast,
+      "Something went wrong. Please try again."
+    )
+    console.log(err);
+  }
+
+  const handleTransaction = async (userPublicAddr: string, userEmail: string, signer:any) => {
+    setMagicSigner(signer)
+
+    try {
+      const nftContract = new ethers.Contract(contractAddress, NFT.abi, signer)
+      setMagicContract(nftContract);
+      console.log("hello")
+    } catch(err) {
+      handleError(err)
+      return
+    }
+
+    setTransactionParams({
+      userPublicAddr, userEmail
+    })
+    setTransact(true);
+  }
+
+  useEffect(() => {
+    if(library && account && contractAddress) {
+      // console.log("ABI: ", NFT.abi, "contract addr: ", contractAddress)
+      try {
+        const nftContract = new ethers.Contract(contractAddress, NFT.abi, library?.getSigner(account as string))
+        setContract(nftContract);
+        console.log("hello")
+      } catch(err) {
+        handleError(err)
+        return
+      }
+    }
+    
+  }, [contractAddress, NFT, library, account])
+
+  const uploadTokensTransaction = async (library: any, account:any, userPublicAddr: string, userEmail: string) => {
+
+    setMagicLoadingText("Deposit transaction cost in magic wallet")
+    setMagicLoading(true);
+    setUploadTokenLoading(true);
+
+    let ethToPay;
+
+    try {
+      const etherForOneUpload = (parseInt(gasPrice) * gasEstimates.uploadTransaction) / 10**9; // eth value
+      // console.log("Ether for one upload: ", etherForOneUpload);
+      let numOfTxs = 0;
+      for(let token of tokensToUpload) {
+        numOfTxs += token.amount;
+      }
+      
+      const totalEther = etherForOneUpload * numOfTxs;
+      ethToPay = totalEther.toString();
+      // console.log("Gas to pay in ETH: ", totalEther.toString());
+    } catch(err) {
+      handleMagicError(err)
+      return
+    }
+    console.log("ETH/MATIC to pay: ", ethToPay);
+    try {
+      console.log("Sending ether to magic link wallet: ", userPublicAddr )
+      const tx1 = await library.getSigner(account as string).sendTransaction({
+        to: userPublicAddr,
+        value: ethers.utils.parseEther(ethToPay as string),
+      })
+      
+      await tx1.wait()
+      console.log("Transaction 1: ", tx1.hash);
+    } catch(err) {
+      handleMagicError(err)
+      return
+    }
+
+    try {
+      // console.log(`Granting address ${user?.publicAddress} minter role`);
+      setMagicLoadingText("Give magic wallet permission to upload tokens ")
+
+      const tx2 = await contract.grantMinterRole(userPublicAddr, {
+        gasLimit: 1000000,
+        // nonce: txNonce_injected
+      });
+      await tx2.wait();
+      setMagicLoadingText("Giving magic wallet permission to upload tokens ")
+      console.log("Transaction 2: ", tx2.hash);
+    } catch(err) {
+      handleMagicError(err)
+      return
+    }
+    
+    let txNonce_magic = parseInt((await magicSigner.getTransactionCount()).toString());
+    setMagicLoadingText("Uploading tokens. This might take a minute.")
+    console.log("TX COUNTS: ", parseInt((await magicSigner.getTransactionCount()).toString()));
+
+    let finaltx
+    try {
+      for(let i = 0; i < tokensToUpload.length; i++) {    
+        const { URI, amount } = tokensToUpload[i];
+        
+        for(let j = 1; j <= amount; j++) {
+          console.log("Helllllo")
+                          
+
+          const tx = magicContract.mint(userPublicAddr, URI, {
+            gasLimit: gasEstimates.uploadTransaction,
+            nonce: txNonce_magic,
+            gasPrice: ethers.utils.parseUnits(gasPrice, "gwei")
+          })
+          txNonce_magic++;
+
+          if(i == tokensToUpload.length - 1 && j == amount) {    
+            finaltx = tx;
+            console.log("Final tx before: ", finaltx)
+            
+            await finaltx;
+            console.log("Final tx after: ", finaltx)
+
+            fetch("/api/magicUpload", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                email: userEmail,
+                publicAddress: userPublicAddr,
+                contractAddress: contractAddress,
+                chainId: chainId,
+                txNonce: txNonce_magic
+              })
+            })
+          }
+        }
+      }
+      // fetch("/api/email", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     email: user?.email,
+      //     txHash: "dummytxhash",
+      //     contractAddress: contractAddress,
+      //     chainId: chainId
+      //   })
+      // })
+
+    } catch(err) {
+      handleMagicError(err)
+      return
+    }
+    setMagicSuccess(true);
+    revertState()
+    setMagicLoading(false)
+    setUploadTokenLoading(false);
+    setMagicLoadingText('')
+  }
   
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -233,7 +434,7 @@ export default function MultipleUpload({
                 >                  
 
                   {files.length > 0
-                    ? "Add one or more files"
+                    ? "Add one or more files" 
                     : "Choose one or more files"
                   }
                 </Button>
@@ -271,12 +472,13 @@ export default function MultipleUpload({
               id="token-amount" 
               placeholder="E.g. 1 (by default)"
             />
-            <Stack>
+            {/* <Stack> */}
               <Button 
                 onClick={totalFiles != 0 && skylinksToUpload.length == totalFiles
                   ? onOpen
                   : handleMultipleTokenUpload
                 }
+                // onClick={() => setUploadTokenLoading(true)}
                 isDisabled={(contractAddress == '' || totalFiles == 0 || (tokenAmount != '' && isNaN(parseInt(tokenAmount))) )} 
                 border={(totalFiles != 0 && skylinksToUpload.length == totalFiles) ? "2px" : ""}
                 borderColor={(totalFiles != 0 && skylinksToUpload.length == totalFiles) ? "green.500" : ""}
@@ -296,63 +498,70 @@ export default function MultipleUpload({
                   : ""
                 }
               </Text> */}
-            </Stack>
-            
-            <UploadModal 
-              NFT={NFT}
-              contractAddress={contractAddress}
-              transactions={tokensToUpload}
-              modalParams={{
-                isOpen: isOpen,                
-                onClose: onClose
-              }}
-              onSuccessfulTx={revertState}
-            />
-            
+            {/* </Stack> */}                        
           </Stack>
-          <Stack>
-          {imageSrc ? (
-              <ContentRenderer                                
-                src={imageSrc}
-                file={mediaFile}
-              />
-            ) : (
-              <Flex              
-                height="300px"
-                width="320px"
-                bg="transparent"
-                borderRadius="12px"
-                border="2px dashed #333"
-                align="center"
-                justify="center"
-                direction="column"
-              >
-                {skylinkLoading
-                  ? (
-                    <Stack>
-                      <Center>
-                        <p className="text-gray-400">
-                          Uploading to decentralized storage
-                        </p>
-                      </Center>
-                      <Center>
-                        <Spinner />
-                      </Center>                                                
-                    </Stack>                      
-                    )
-                  : <Text variant="label" color="#333">Media preview</Text>
-                }
-              </Flex>
-            )}
-            <Text>               
-              {totalFiles == 0
-                ? ""
-                : skylinksToUpload.length == totalFiles
 
-                  ? "All tokens prepared for your collection!"
-                  : `Queued ${files.length} ${files.length == 1 ? "file" : "files"}. You can preview and upload files one after another.`
-              }
-            </Text>
+          <UploadModal 
+            NFT={NFT}
+            contractAddress={contractAddress}
+            transactions={tokensToUpload}
+            modalParams={{
+              isOpen: isOpen,                
+              onClose: onClose
+            }}
+            onSuccessfulTx={revertState}
+            magicParams={{
+              handleTransaction,
+              magicLoading,
+              magicSuccess,
+              handleMagicError,                
+              magicLoadingText
+            }}
+          />
+
+          <Stack width="320px">
+            {imageSrc ? (
+                <ContentRenderer                                
+                  src={imageSrc}
+                  file={mediaFile}
+                />
+              ) : (
+                <Flex              
+                  height="300px"
+                  width="320px"
+                  bg="transparent"
+                  borderRadius="12px"
+                  border="2px dashed #333"
+                  align="center"
+                  justify="center"
+                  direction="column"
+                >
+                  {skylinkLoading
+                    ? (
+                      <Stack>
+                        <Center>
+                          <p className="text-gray-400">
+                            Uploading to decentralized storage
+                          </p>
+                        </Center>
+                        <Center>
+                          <Spinner />
+                        </Center>                                                
+                      </Stack>                      
+                      )
+                    : <Text variant="label" color="#333">Media preview</Text>
+                  }
+                </Flex>
+              )}
+              <Text>               
+                {totalFiles == 0
+                  ? ""
+                  : skylinksToUpload.length == totalFiles
+
+                    ? "All tokens prepared for your collection!"
+                    : `Queued ${files.length} ${files.length == 1 ? "file" : "files"}. You can preview and upload files one after another.`
+                }
+              </Text>
             </Stack>  
         </SimpleGrid>  
       </Center>

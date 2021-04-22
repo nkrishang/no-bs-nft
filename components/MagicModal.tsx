@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   Text,
   Button,
   Input,
   Stack,
   HStack,
-  useToast
+  useToast,
 } from "@chakra-ui/react"
 
 import useUser from 'lib/useUser';
@@ -15,36 +15,27 @@ import { Web3Provider } from '@ethersproject/providers'
 
 import { ethers } from 'ethers';
 import { Magic } from 'magic-sdk';
-import useGasPrice from 'lib/useGasPrice';
 import { supportedIds } from "lib/supportedIds";
 import { errorToast } from 'lib/toast';
+import { ContractContext } from 'lib/AppContext';
 
-import {parse, stringify} from 'flatted';
-
-export default function MagicModal({transactions, NFT, contractAddress, onSuccessfulTx}: any): JSX.Element {
+export default function MagicModal({magicLoading, handleMagicError, handleTransaction, magicLoadingText, magicSuccess}: any): JSX.Element {
 
   const context = useWeb3React<Web3Provider>()
-  const { account, library, chainId } = context
+  const { chainId } = context
 
   const { user, login, logout } = useUser();
   const [email, setEmail] = useState<string>('');
 
-  const [contract, setContract] = useState<any>('');
-  const [magicContract, setMagicContract] = useState<any>('');
-  const [magicProvider, setMagicProvider] = useState<any>('');
-  const [magicSigner, setMagicSigner] = useState<any>('');
-
-  const [loading, setLoading] = useState<boolean>(false);
   const [loadingText, setLoadingText] = useState<string>('');
   const [logoutLoading, setLogoutLoading] = useState<boolean>(false)
   const [loginLoading, setLoginLoading] = useState<boolean>(false);
 
-  const [check, setCheck] = useState<boolean>(false);
-  const [success, setSuccess] = useState<boolean>(false);
-
-  const { gasPrice, gasEstimates } = useGasPrice(chainId as number || 1);
+  const [magicSigner, setMagicSigner] = useState<any>('');
 
   const toast = useToast();
+
+  const { uploadTokenLoading } = useContext(ContractContext);
 
   useEffect(() => {
     console.log("USER EMAIL: ", user?.email);
@@ -57,86 +48,48 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     }
 
     // console.log("Checking")
-  }, [user, check])
+  }, [user])
 
   useEffect(() => {
-    let magic: any;
-    console.log("Getting provider for chainId: ", chainId)
-    // magic key
-    switch(chainId) {
-      case 1:
-        magic = new Magic("pk_live_5F8BDFD9AA53D653")
-        break;
-      case 3:
-        // console.log("ROPSTEN PROVIDER")
+    if(chainId) {
+      console.log("ENS name: ", supportedIds[chainId as number].url)
+      let magic: any;
+      
+      try {
         magic = new Magic("pk_live_5F8BDFD9AA53D653", {
           network: {
-            rpcUrl: supportedIds[chainId].url,
+            rpcUrl: supportedIds[chainId as number].url,
             chainId: chainId
           }
         })
-        break;
-      case 137:
-        magic = new Magic("pk_live_5F8BDFD9AA53D653", {
-          network: {
-            rpcUrl: supportedIds[chainId].url,
-            chainId: chainId
-          }
-        });
-        break;
-      case 80001:
-        magic = magic = new Magic("pk_live_5F8BDFD9AA53D653", {
-          network: {
-            rpcUrl: supportedIds[chainId].url,
-            chainId: chainId
-          }
-        });
-        break;
-      default:
-        magic = new Magic("pk_live_5F8BDFD9AA53D653")
-        break;
-    }
-
-    const rpc: any = magic.rpcProvider
-    const provider = new ethers.providers.Web3Provider(rpc);
-    const signer = provider.getSigner();
-
-    const nftContract = new ethers.Contract(contractAddress, NFT.abi, signer);
-    // console.log("Got signer: ", signer)
-    setMagicProvider(provider);
-    setMagicSigner(signer);
-    setMagicContract(nftContract);
-  }, [chainId])
-
-  useEffect(() => {
-    if(library && account) {
-      try {
-        const nftContract = new ethers.Contract(contractAddress, NFT.abi, library?.getSigner(account as string))
-        setContract(nftContract);
       } catch(err) {
         console.log(err)
+        errorToast(
+          toast,
+          "Something went wrong. Please contact krishang@nftlabs.co for support, or try again."
+        )
         return
       }
-    }
-    
-  }, [contractAddress, NFT, library, account])
 
-  const handleError = (err: any) => {
-    setLoading(false)
-    setLoadingText('')
-    errorToast(
-      toast,
-      "Something went wrong. Please try again."
-    )
-    console.log(err);
-  }
+      console.log("Getting provider for chainId: ", chainId)
+
+      const rpc: any = magic.rpcProvider
+      const provider = new ethers.providers.Web3Provider(rpc);
+      const signer = provider.getSigner();
+
+      // console.log("Got signer: ", signer)
+      setMagicSigner(signer);
+    }
+  }, [chainId, user])
+
+
 
   const handleLogout = async () => {
     setLogoutLoading(true)
     try {
       await logout();
     } catch(err) {
-      handleError(err);
+      handleMagicError(err);
     }
     setLogoutLoading(false)
   }
@@ -148,17 +101,18 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     try {
       success = await login(email);
     } catch(err) {
-      handleError(err);
+      handleMagicError(err);
     }
 
     if(success) {
       console.log("LOGIN SUCCESS")
-      setCheck(true);
+      
     } else {
       console.log("LOGIN UNSUCCESSFUL")
       setLoginLoading(false)
-      setCheck(true);
+      
     }
+    setLoadingText("");
   }
 
   function validateEmail(email: string) {
@@ -166,6 +120,7 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     return re.test(email);
   }
 
+<<<<<<< HEAD
   const uploadTokensTransaction = async (library: any, account:any) => {
 
     setLoadingText("Deposit transaction cost in magic wallet")
@@ -285,6 +240,8 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     setLoadingText('')
   }
 
+=======
+>>>>>>> development
   return (
     <>
       <Text my="2">
@@ -300,6 +257,12 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
           have been uploaded to your collection.
         `}
       </Text>
+
+      <p className="text-green-700 text-base my-2" style={{display: !uploadTokenLoading ? "none" : ""}}>
+        {`
+          Please don't close the browser window until the loading indicator in the bottom right corner disappears.
+        `}
+      </p>
       
       <HStack my="4">
         <Input
@@ -332,15 +295,15 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
       <Stack>
         <Button
           mt={user?.isLoggedIn ? "4" : ""} 
-          onClick={user?.isLoggedIn ? () => uploadTokensTransaction(library, account) : () => handleLogin(email)}
-          isLoading={loginLoading || loading}
-          loadingText={loadingText}
-          colorScheme={success ? "green" : "gray"}
-          isDisabled={success || (!user?.isLoggedIn && !validateEmail(email))}
+          onClick={user?.isLoggedIn ? () => handleTransaction(user.publicAddress, user.email, magicSigner) : () => handleLogin(email)}
+          isLoading={loginLoading || magicLoading}
+          loadingText={loadingText || magicLoadingText}
+          colorScheme={magicSuccess ? "green" : "gray"}
+          isDisabled={magicSuccess || (!user?.isLoggedIn && !validateEmail(email))}
         >
-          {success
+          {magicSuccess
             ? `We'll email you when all's done.`
-            : user?.isLoggedIn 
+            : user?.isLoggedIn
               ? "Upload all tokens to your NFT collection" 
               : "Submit email"}
         </Button>

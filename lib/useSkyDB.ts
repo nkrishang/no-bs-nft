@@ -161,9 +161,9 @@ export default function useSkyDB(dataKey: string, seed: string): any {
   // Add transaction log to DB
   const logContractAddress = async (publicAddress: string, contractAddress: any) => {
     const data = await getDataFromSkyDB();
-    console.log("ZZZ data: ", data)
-    console.log("PADRR: ", publicAddress)
-    console.log("Logging contract")
+    // console.log("ZZZ data: ", data)
+    // console.log("PADRR: ", publicAddress)
+    // console.log("Logging contract")
     if (data != undefined && data[publicAddress] != undefined) {
       const field = data[publicAddress].NFTs;
       const logs = field && field.length ? field : [];
