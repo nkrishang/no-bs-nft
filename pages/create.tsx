@@ -23,9 +23,25 @@ import useGasPrice from "lib/useGasPrice";
 
 import { ContractContext } from "lib/AppContext";
 
-export default function DeployForm(): JSX.Element {
+import { GetStaticProps } from 'next'
+import { compileERC721 } from 'lib/compile';
+
+export const getStaticProps: GetStaticProps = async (context) => {
+
+  const {NFT, BidExecutor} = await compileERC721();
+
+  return {
+    props: {
+      NFT,
+      BidExecutor
+    }
+  }
+}
+
+
+export default function DeployForm({NFT, BidExecutor}: any): JSX.Element {
   
-  const { NFT, BidExecutor, logNewContract, setContractAddress } = useContext(ContractContext);
+  const { logNewContract, setContractAddress, handleNewContract } = useContext(ContractContext);
 
   const toast = useToast();
   const context = useWeb3React<Web3Provider>()
@@ -85,6 +101,8 @@ export default function DeployForm(): JSX.Element {
       setContractAddress(address);
       await logNewContract(account, address);
       setLoadingText("Tx 3 of 3: Configuring auction system");
+      await handleNewContract();
+
     } catch(err) {
       handleTxError(err);
       return
@@ -116,6 +134,7 @@ export default function DeployForm(): JSX.Element {
       })
     }
 
+
     successToast(
       toast, 
       `Your NFT collection has been created on ${supportedIds[chainId as number].name}.`
@@ -130,7 +149,7 @@ export default function DeployForm(): JSX.Element {
   return (
     <>
       <ContentWrapper>
-      <Center mb="12">					
+      <Center mb="8">					
 					<Stack>
 						<p className="text-2xl text-gray-800 font-normal">
 							Create an NFT collection!
@@ -152,7 +171,14 @@ export default function DeployForm(): JSX.Element {
 								{`2. `} 
 							</span>
 								Done! Pay the transaction costs and create your NFT collection.   
-						</span>																
+						</span>
+
+            <span>
+							<span className="font-bold text-lg">
+								{`3. `} 
+							</span>
+								Your NFT collection comes with a built in auction system. (The interface for it is being built!)   
+						</span>																	
 					</Stack>	
 				</Center> 
 
@@ -176,7 +202,8 @@ export default function DeployForm(): JSX.Element {
             />
             
             <Stack>
-              <Button 
+              <Button
+                isDisabled={!account} 
                 width="400px"
                 loadingText={loadingText}
                 isLoading={loading}

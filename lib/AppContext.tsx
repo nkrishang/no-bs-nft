@@ -17,7 +17,7 @@ import { useDefaultSkyDB } from "lib/useSkyDB";
 
 export const ContractContext = createContext<any>('');
 
-export function ContractWrapper({ NFT, BidExecutor, children }: any) {
+export function ContractWrapper({ children }: any) {
   
   const context = useWeb3React<Web3Provider>()
   const { account, chainId } = context
@@ -25,9 +25,10 @@ export function ContractWrapper({ NFT, BidExecutor, children }: any) {
   const { logContractAddress, getDataFromSkyDB, onboardUser } = useDefaultSkyDB();
 
   const [contracts, setContracts] = useState<any[]>([]);
-  const [contractAddress, setContractAddress] = useState<any[]>([]);
+  const [contractAddress, setContractAddress] = useState<string>('');
 
   const [uploadTokenLoading, setUploadTokenLoading] = useState<boolean>(false);
+  const [newContractAdded, setNewContractAdded] = useState<boolean>(false);
 
   useEffect(() => {
     
@@ -64,6 +65,19 @@ export function ContractWrapper({ NFT, BidExecutor, children }: any) {
     }
   }, [account, chainId])
 
+  const handleNewContract = async () => {
+    setNewContractAdded(true);
+
+    const wait = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve('');
+      }, 5000)
+    })
+
+    await wait;
+    setNewContractAdded(false);
+  }
+
   const logNewContract = async (acc: string, contractAddr: string) => {
     setContracts([...contracts, {
       address: contractAddr,
@@ -82,16 +96,17 @@ export function ContractWrapper({ NFT, BidExecutor, children }: any) {
   }
 
   let sharedState = {
-    NFT, 
-    BidExecutor,
     contracts,
     setContracts,
-    logContractAddress,
+    logNewContract,
     contractAddress,
     setContractAddress,
     uploadTokenLoading,
-    setUploadTokenLoading
+    setUploadTokenLoading,
+    newContractAdded,
+    handleNewContract
   };
+
 
   return (
     <ContractContext.Provider value={sharedState}>

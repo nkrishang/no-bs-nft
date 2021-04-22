@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-
+import { ethers } from 'ethers'
+import { Magic } from 'magic-sdk';
 import {
   Button,
   Stack,
@@ -25,17 +26,19 @@ import { ContentRenderer } from "./ContentRenderer";
 
 import { uploadMetadataToSkynet } from "lib/skynet";
 import { errorToast, successToast } from "lib/toast";
+import useGasPrice from 'lib/useGasPrice';
+import { supportedIds } from "lib/supportedIds";
 
 import UploadModal from "components/UploadModal";
 
 type MultipleUploadProps = {
   NFT: any;
-  contractAddress: string
+  contractAddress: string;
 }
 
 export default function MultipleUpload({
   NFT,
-  contractAddress 
+  contractAddress
 }: MultipleUploadProps): JSX.Element {
 
   const skyPortalRef = useRef<any>();
@@ -56,8 +59,8 @@ export default function MultipleUpload({
 
   const [tokenAmount, setTokenAmount] = useState<string>('');
   const [skylinksToUpload, setSkylinksToUpload] = useState<string[]>([]);
-  const [tokensToUpload, setTokensToUpload] = useState<any>([]);
-
+  const [tokensToUpload, setTokensToUpload] = useState<any>([]); // move to upload form
+ 
   // const [estimatedCost, setEstimatedCost] = useState<string>('')
 
   const toast = useToast();
@@ -153,11 +156,6 @@ export default function MultipleUpload({
     }
   }
 
-  const handleError = (err: any) => {
-    errorToast(toast, "Sorry, something went wrong. Please try again");
-    console.log(err)
-  }
-
   const handleMultipleTokenUpload = async () => {
     setTxLoadingText('Uploading to decentralized storage')
     setTxLoading(true);
@@ -198,6 +196,216 @@ export default function MultipleUpload({
 
     setTxLoading(false);
     setTxLoadingText('');
+  }
+
+  /// MAGIC MODAL LOGIC
+  const context = useWeb3React<Web3Provider>()
+  const { account, library, chainId } = context
+
+  const { user } = useUser();
+
+  const [magicContract, setMagicContract] = useState<any>('');
+  const [magicSigner, setMagicSigner] = useState<any>('');
+
+  const [magicLoading, setMagicLoading] = useState<boolean>(false);
+  const [magicLoadingText, setMagicLoadingText] = useState<string>('');
+  const [magicSuccess, setMagicSuccess] = useState<boolean>(false);
+
+  const [transact, setTransact] = useState<boolean>(false);
+
+  const { gasPrice, gasEstimates } = useGasPrice(chainId as number || 1);
+
+  useEffect(() => {
+
+    const performTransaction = async () => {
+      await uploadTokensTransaction(library, account)
+      setTransact(false);
+    }
+
+    if(transact) performTransaction();
+  }, [transact])
+
+  // useEffect(() => {
+  //   if(chainId) {
+  //     console.log("ENS name: ", supportedIds[chainId as number].url)
+  //     let magic: any;
+      
+  //     try {
+  //       magic = new Magic("pk_live_5F8BDFD9AA53D653", {
+  //         network: {
+  //           rpcUrl: supportedIds[chainId as number].url,
+  //           chainId: chainId
+  //         }
+  //       })
+  //     } catch(err) {
+  //       handleError(err)
+  //       return
+  //     }
+
+  //     console.log("Getting provider for chainId: ", chainId)
+
+  //     const rpc: any = magic.rpcProvider
+  //     const provider = new ethers.providers.Web3Provider(rpc);
+  //     const signer = provider.getSigner();
+
+  //     const nftContract = new ethers.Contract(contractAddress, NFT.abi, signer);
+  //     // console.log("Got signer: ", signer)
+  //     setMagicSigner(signer);
+  //     setMagicContract(nftContract);
+  //   }
+  // }, [chainId])
+
+  useEffect(() => {
+    if(library && account && contractAddress) {
+      // console.log("ABI: ", NFT.abi, "contract addr: ", contractAddress)
+      try {
+        const nftContract = new ethers.Contract(contractAddress, NFT.abi, library?.getSigner(account as string))
+        setMagicContract(nftContract);
+        console.log("hello")
+      } catch(err) {
+        handleError(err)
+        return
+      }
+    }
+    
+  }, [contractAddress, NFT, library, account])
+
+  const handleError = (err: any) => {
+    errorToast(toast, "Sorry, something went wrong. Please try again");
+    console.log(err)
+  }
+
+  const handleMagicError = (err: any) => {
+    setMagicLoading(false)
+    setMagicLoadingText('')
+    errorToast(
+      toast,
+      "Something went wrong. Please try again."
+    )
+    console.log(err);
+  }
+
+  const handleTransaction = async () => {
+    setTransact(true);
+  }
+
+  const uploadTokensTransaction = async (library: any, account:any) => {
+
+    setMagicLoadingText("Deposit transaction cost in magic wallet")
+    setMagicLoading(true);
+
+    let ethToPay;
+
+    try {
+      const etherForOneUpload = (parseInt(gasPrice) * gasEstimates.uploadTransaction) / 10**9; // eth value
+      // console.log("Ether for one upload: ", etherForOneUpload);
+      let numOfTxs = 0;
+      for(let token of tokensToUpload) {
+        numOfTxs += token.amount;
+      }
+      
+      const totalEther = etherForOneUpload * numOfTxs;
+      ethToPay = totalEther.toString();
+      // console.log("Gas to pay in ETH: ", totalEther.toString());
+    } catch(err) {
+      handleMagicError(err)
+      return
+    }
+    console.log("ETH/MATIC to pay: ", ethToPay);
+    try {
+      console.log("Sending ether to magic link wallet: ", user?.publicAddress as string )
+      const tx1 = await library.getSigner(account as string).sendTransaction({
+        to: user?.publicAddress as string,
+        value: ethers.utils.parseEther(ethToPay as string),
+      })
+      
+      await tx1.wait()
+      console.log("Transaction 1: ", tx1.hash);
+    } catch(err) {
+      handleMagicError(err)
+      return
+    }
+
+    try {
+      // console.log(`Granting address ${user?.publicAddress} minter role`);
+      setMagicLoadingText("Give magic wallet permission to upload tokens ")
+
+      const tx2 = await magicContract.grantMinterRole(user?.publicAddress as string, {
+        gasLimit: 1000000,
+        // nonce: txNonce_injected
+      });
+      await tx2.wait();
+      setMagicLoadingText("Giving magic wallet permission to upload tokens ")
+      console.log("Transaction 2: ", tx2.hash);
+    } catch(err) {
+      handleMagicError(err)
+      return
+    }
+    
+    let txNonce_magic = parseInt((await magicSigner.getTransactionCount()).toString());
+    setMagicLoadingText("Uploading tokens. This might take a minute.")
+    console.log("TX COUNTS: ", parseInt((await magicSigner.getTransactionCount()).toString()));
+
+    let finaltx
+    try {
+      for(let i = 0; i < tokensToUpload.length; i++) {    
+        const { URI, amount } = tokensToUpload[i];
+        
+        for(let j = 1; j <= amount; j++) {
+          console.log("Helllllo")
+                          
+
+          const tx = magicContract.mint(user?.publicAddress as string, URI, {
+            gasLimit: gasEstimates.uploadTransaction,
+            nonce: txNonce_magic,
+            gasPrice: ethers.utils.parseUnits(gasPrice, "gwei")
+          })
+          txNonce_magic++;
+
+          if(i == tokensToUpload.length - 1 && j == amount) {    
+            finaltx = tx;
+            console.log("Final tx before: ", finaltx)
+            
+            await finaltx;
+            console.log("Final tx after: ", finaltx)
+
+            fetch("/api/magicUpload", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                email: user?.email,
+                publicAddress: user?.publicAddress,
+                contractAddress: contractAddress,
+                chainId: chainId,
+                txNonce: txNonce_magic
+              })
+            })
+          }
+        }
+      }
+      // fetch("/api/email", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     email: user?.email,
+      //     txHash: "dummytxhash",
+      //     contractAddress: contractAddress,
+      //     chainId: chainId
+      //   })
+      // })
+
+    } catch(err) {
+      handleMagicError(err)
+      return
+    }
+    setMagicSuccess(true);
+    revertState()
+    setMagicLoading(false)
+    setMagicLoadingText('')
   }
   
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
@@ -307,6 +515,13 @@ export default function MultipleUpload({
                 onClose: onClose
               }}
               onSuccessfulTx={revertState}
+              magicParams={{
+                handleTransaction,
+                magicLoading,
+                magicSuccess,
+                handleMagicError,                
+                magicLoadingText
+              }}
             />
             
           </Stack>

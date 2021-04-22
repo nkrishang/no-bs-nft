@@ -21,8 +21,12 @@ import {
 } from '@chakra-ui/react';
 
 import NFTRow from "components/NFTRow";
+import { ContractContext } from 'lib/AppContext';
+import { useContext } from 'react';
 
 export default function CollectionList({NFTs}: any): JSX.Element {
+
+  const { newContractAdded } = useContext(ContractContext);
 
   return (
     <Flex
@@ -42,9 +46,10 @@ export default function CollectionList({NFTs}: any): JSX.Element {
           <Button
             variant="outline"
             width="200px"
-            border="2px"
-            borderColor="gray.400"
+            border={"2px"}
+            borderColor={newContractAdded ? "green.500" : "gray.400"}
             boxShadow="md"
+            colorScheme={newContractAdded ? "green" : ""}
           >
             Your NFT collections.
           </Button>

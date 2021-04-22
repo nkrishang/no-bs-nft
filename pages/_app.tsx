@@ -19,22 +19,6 @@ import { ContractContext, ContractWrapper } from "lib/AppContext";
 import Navbar from 'components/Navbar';
 import CollectionList  from 'components/CollectionList';
 
-interface ModifiedAppProps extends AppProps {
-  NFT: any;
-  BidExecutor: any;
-}
-export const getStaticProps: GetStaticProps = async (context) => {
-
-  const {NFT, BidExecutor} = await compileERC721();
-
-  return {
-    props: {
-      NFT,
-      BidExecutor
-    }
-  }
-}
-
 function getLibrary(provider: any): Web3Provider {
   const library = new Web3Provider(provider);
   return library;
@@ -53,7 +37,7 @@ function NavbarWrapper({ children }: any): JSX.Element {
   )
 }
 
-function App({ NFT, BidExecutor, Component, pageProps }: ModifiedAppProps): JSX.Element {
+function App({ Component, pageProps }: AppProps): JSX.Element {
 
   return (
     <>
@@ -63,7 +47,7 @@ function App({ NFT, BidExecutor, Component, pageProps }: ModifiedAppProps): JSX.
       >  
         <ChakraProvider>   
 
-          <ContractWrapper NFT={NFT} BidExecutor={BidExecutor}>
+          <ContractWrapper>
             <NavbarWrapper>
               <Component {...pageProps} /> 
             </NavbarWrapper>

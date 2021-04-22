@@ -21,30 +21,17 @@ import { errorToast } from 'lib/toast';
 
 import {parse, stringify} from 'flatted';
 
-export default function MagicModal({transactions, NFT, contractAddress, onSuccessfulTx}: any): JSX.Element {
+export default function MagicModal({magicLoading, handleMagicError, handleTransaction, magicLoadingText, magicSuccess}: any): JSX.Element {
 
   const context = useWeb3React<Web3Provider>()
-  const { account, library, chainId } = context
+  const { account, library } = context
 
   const { user, login, logout } = useUser();
   const [email, setEmail] = useState<string>('');
 
-  const [contract, setContract] = useState<any>('');
-  const [magicContract, setMagicContract] = useState<any>('');
-  const [magicProvider, setMagicProvider] = useState<any>('');
-  const [magicSigner, setMagicSigner] = useState<any>('');
-
-  const [loading, setLoading] = useState<boolean>(false);
   const [loadingText, setLoadingText] = useState<string>('');
   const [logoutLoading, setLogoutLoading] = useState<boolean>(false)
   const [loginLoading, setLoginLoading] = useState<boolean>(false);
-
-  const [check, setCheck] = useState<boolean>(false);
-  const [success, setSuccess] = useState<boolean>(false);
-
-  const { gasPrice, gasEstimates } = useGasPrice(chainId as number || 1);
-
-  const toast = useToast();
 
   useEffect(() => {
     console.log("USER EMAIL: ", user?.email);
@@ -57,86 +44,16 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     }
 
     // console.log("Checking")
-  }, [user, check])
+  }, [user])
 
-  useEffect(() => {
-    let magic: any;
-    console.log("Getting provider for chainId: ", chainId)
-    // magic key
-    switch(chainId) {
-      case 1:
-        magic = new Magic("pk_live_5F8BDFD9AA53D653")
-        break;
-      case 3:
-        // console.log("ROPSTEN PROVIDER")
-        magic = new Magic("pk_live_5F8BDFD9AA53D653", {
-          network: {
-            rpcUrl: supportedIds[chainId].url,
-            chainId: chainId
-          }
-        })
-        break;
-      case 137:
-        magic = new Magic("pk_live_5F8BDFD9AA53D653", {
-          network: {
-            rpcUrl: supportedIds[chainId].url,
-            chainId: chainId
-          }
-        });
-        break;
-      case 80001:
-        magic = magic = new Magic("pk_live_5F8BDFD9AA53D653", {
-          network: {
-            rpcUrl: supportedIds[chainId].url,
-            chainId: chainId
-          }
-        });
-        break;
-      default:
-        magic = new Magic("pk_live_5F8BDFD9AA53D653")
-        break;
-    }
 
-    const rpc: any = magic.rpcProvider
-    const provider = new ethers.providers.Web3Provider(rpc);
-    const signer = provider.getSigner();
-
-    const nftContract = new ethers.Contract(contractAddress, NFT.abi, signer);
-    // console.log("Got signer: ", signer)
-    setMagicProvider(provider);
-    setMagicSigner(signer);
-    setMagicContract(nftContract);
-  }, [chainId])
-
-  useEffect(() => {
-    if(library && account) {
-      try {
-        const nftContract = new ethers.Contract(contractAddress, NFT.abi, library?.getSigner(account as string))
-        setContract(nftContract);
-      } catch(err) {
-        console.log(err)
-        return
-      }
-    }
-    
-  }, [contractAddress, NFT, library, account])
-
-  const handleError = (err: any) => {
-    setLoading(false)
-    setLoadingText('')
-    errorToast(
-      toast,
-      "Something went wrong. Please try again."
-    )
-    console.log(err);
-  }
 
   const handleLogout = async () => {
     setLogoutLoading(true)
     try {
       await logout();
     } catch(err) {
-      handleError(err);
+      handleMagicError(err);
     }
     setLogoutLoading(false)
   }
@@ -148,141 +65,23 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
     try {
       success = await login(email);
     } catch(err) {
-      handleError(err);
+      handleMagicError(err);
     }
 
     if(success) {
       console.log("LOGIN SUCCESS")
-      setCheck(true);
+      
     } else {
       console.log("LOGIN UNSUCCESSFUL")
       setLoginLoading(false)
-      setCheck(true);
+      
     }
+    setLoadingText("");
   }
 
   function validateEmail(email: string) {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
-  }
-
-  const uploadTokensTransaction = async (library: any, account:any) => {
-
-    setLoadingText("Deposit transaction cost in magic wallet")
-    setLoading(true);
-
-    let ethToPay;
-
-    try {
-      const etherForOneUpload = (parseInt(gasPrice) * gasEstimates.uploadTransaction) / 10**9; // eth value
-      // console.log("Ether for one upload: ", etherForOneUpload);
-      let numOfTxs = 0;
-      for(let token of transactions) {
-        numOfTxs += token.amount;
-      }
-      
-      const totalEther = etherForOneUpload * numOfTxs;
-      ethToPay = totalEther.toString();
-      // console.log("Gas to pay in ETH: ", totalEther.toString());
-    } catch(err) {
-      handleError(err)
-      return
-    }
-    console.log("ETH/MATIC to pay: ", ethToPay);
-    try {
-      // console.log("Sending ether to magic link wallet")
-      const tx1 = await library.getSigner(account as string).sendTransaction({
-        to: user?.publicAddress as string,
-        value: ethers.utils.parseEther(ethToPay as string),
-      })
-      
-      await tx1.wait()
-      console.log("Transaction 1: ", tx1.hash);
-    } catch(err) {
-      handleError(err)
-      return
-    }
-
-    try {
-      // console.log(`Granting address ${user?.publicAddress} minter role`);
-      setLoadingText("Give magic wallet permission to upload tokens ")
-
-      const tx2 = await contract.grantMinterRole(user?.publicAddress as string, {
-        gasLimit: 1000000,
-        // nonce: txNonce_injected
-      });
-      await tx2.wait();
-      setLoadingText("Giving magic wallet permission to upload tokens ")
-      console.log("Transaction 2: ", tx2.hash);
-    } catch(err) {
-      handleError(err)
-      return
-    }
-    
-    let txNonce_magic = parseInt((await magicSigner.getTransactionCount()).toString());
-    setLoadingText("Uploading tokens. This might take a minute.")
-    console.log("TX COUNTS: ", parseInt((await magicSigner.getTransactionCount()).toString()));
-
-    let finaltx
-    try {
-      for(let i = 0; i < transactions.length; i++) {    
-        const { URI, amount } = transactions[i];
-        
-        for(let j = 1; j <= amount; j++) {
-          console.log("Helllllo")
-                          
-
-          const tx = magicContract.mint(user?.publicAddress as string, URI, {
-            gasLimit: gasEstimates.uploadTransaction,
-            nonce: txNonce_magic,
-            gasPrice: ethers.utils.parseUnits(gasPrice, "gwei")
-          })
-          txNonce_magic++;
-
-          if(i == transactions.length - 1 && j == amount) {    
-            finaltx = tx;
-            console.log("Final tx before: ", finaltx)
-            
-            await finaltx;
-            console.log("Final tx after: ", finaltx)
-
-            fetch("/api/magicUpload", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                email: user?.email,
-                publicAddress: user?.publicAddress,
-                contractAddress: contractAddress,
-                chainId: chainId,
-                txNonce: txNonce_magic
-              })
-            })
-          }
-        }
-      }
-      // fetch("/api/email", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     email: user?.email,
-      //     txHash: "dummytxhash",
-      //     contractAddress: contractAddress,
-      //     chainId: chainId
-      //   })
-      // })
-
-    } catch(err) {
-      handleError(err)
-      return
-    }
-    setSuccess(true);
-    onSuccessfulTx();
-    setLoading(false)
-    setLoadingText('')
   }
 
   return (
@@ -332,13 +131,13 @@ export default function MagicModal({transactions, NFT, contractAddress, onSucces
       <Stack>
         <Button
           mt={user?.isLoggedIn ? "4" : ""} 
-          onClick={user?.isLoggedIn ? () => uploadTokensTransaction(library, account) : () => handleLogin(email)}
-          isLoading={loginLoading || loading}
-          loadingText={loadingText}
-          colorScheme={success ? "green" : "gray"}
-          isDisabled={success || (!user?.isLoggedIn && !validateEmail(email))}
+          onClick={user?.isLoggedIn ? () => handleTransaction() : () => handleLogin(email)}
+          isLoading={loginLoading || magicLoading}
+          loadingText={loadingText || magicLoadingText}
+          colorScheme={magicSuccess ? "green" : "gray"}
+          isDisabled={magicSuccess || (!user?.isLoggedIn && !validateEmail(email))}
         >
-          {success
+          {magicSuccess
             ? `We'll email you when all's done.`
             : user?.isLoggedIn 
               ? "Upload all tokens to your NFT collection" 

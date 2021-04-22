@@ -115,11 +115,10 @@ export default function InjectedModal({contractAddress, NFT, transactions, onSuc
 
       <Stack>
         <Button 
-          onClick={() => uploadTokensTransaction(library, account)}
+          onClick={!success ? () => uploadTokensTransaction(library, account) : () => {}}
           isLoading={loading}
           loadingText={loadingText}
           colorScheme={success ? "green" : "gray"}
-          isDisabled={success}
         >
           {success
             ? `All tokens have been uploaded to your NFT collection!`
