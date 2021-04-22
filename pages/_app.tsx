@@ -1,5 +1,6 @@
 import 'tailwindcss/tailwind.css'
 
+import { AppProps } from 'next/app';
 import { ChakraProvider } from "@chakra-ui/react"
 
 import { Web3Provider } from "@ethersproject/providers";
@@ -16,7 +17,7 @@ function getLibrary(provider: any): Web3Provider {
   return library;
 }
 
-function App({Component, pageProps }: any): JSX.Element {
+function App({Component, pageProps }: AppProps): JSX.Element {
   
   return (
     <>
