@@ -42,20 +42,24 @@ export default function Navbar({NFTs}: any): JSX.Element {
   }, [account, chainId])
 
   return (
-    <div className="w-full flex justify-between border-b-2 border-gray-200 py-4 sticky top-0 bg-white shadow">
+    <div className="w-full flex justify-between border-b-2 border-gray-200 py-4 sticky top-0 bg-white shadow mb-16">
       <HStack>
-        <p className="text-gray-800 font-black text-3xl ml-8 mr-8">
-          No Bullshit NFT.
-        </p>
-
-        <Link href="https://discord.gg/baNTHHBD36" isExternal>
-          <p className="mx-4">
-            Discord
+        <Link href="/">
+          <p className="text-gray-800 font-black text-3xl ml-8 mr-8">
+            No Bullshit NFT.
           </p>
         </Link>
 
-        <Link href="https://github.com/nkrishang/no-bs-nft" isExternal mx="2">
-          Source code
+        <Link href="/create">
+          <p className="mx-4">
+            Create collection
+          </p>
+        </Link>
+
+        <Link href="/upload" mx="2">
+        <p className="mx-4">
+            Upload media to collection
+          </p>
         </Link>
 
         {/* <Link href="/create">

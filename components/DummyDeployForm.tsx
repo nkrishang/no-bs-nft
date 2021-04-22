@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   Button,
@@ -6,27 +6,28 @@ import {
   Center,
   Input,
   useToast,
-  Text,
-  Link,
-  HStack
+  Text
 } from '@chakra-ui/react';
 
 import { useWeb3React } from '@web3-react/core'
 import { Web3Provider } from '@ethersproject/providers'
 
-import { ContentWrapper } from 'components/ContentWrapper';
+import { ContentWrapper } from './ContentWrapper';
 
 import { deployBidExecutor, deployERC721, setNFTFactory } from 'lib/deploy';
 import { supportedIds } from "lib/supportedIds";
 import { errorToast, successToast } from "lib/toast";
 import useGasPrice from "lib/useGasPrice";
 
-import { ContractContext } from "lib/AppContext";
+type DeployFormProps = {
+  logContractAddress:any;
+  NFT: {abi: any, bytecode: any};
+  BidExecutor: {abi: any, bytecode: any};
+  setContractAddress: any;
+}
 
-export default function DeployForm(): JSX.Element {
+export default function DeployForm({logContractAddress, NFT, BidExecutor, setContractAddress}: DeployFormProps): JSX.Element {
   
-  const { NFT, BidExecutor, logNewContract, setContractAddress } = useContext(ContractContext);
-
   const toast = useToast();
   const context = useWeb3React<Web3Provider>()
   const { library, account, chainId } = context
@@ -37,9 +38,8 @@ export default function DeployForm(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingText, setLoadingText] = useState<string>('');
 
-
-  // const [estimatedCost, setEstimatedCost] = useState<string|number>('')
-  // const [estimatedCostOnMatic, setEstimatedCostOnMatic] = useState<string|number>('');
+  const [estimatedCost, setEstimatedCost] = useState<string|number>('')
+  const [estimatedCostOnMatic, setEstimatedCostOnMatic] = useState<string|number>('');
 
   // const { costEstimates } = useGasPrice(chainId as number || 1);
   // const gasMethods = useGasPrice(137);
@@ -83,7 +83,7 @@ export default function DeployForm(): JSX.Element {
       
       nftAddress = address;
       setContractAddress(address);
-      await logNewContract(account, address);
+      await logContractAddress(account, address);
       setLoadingText("Tx 3 of 3: Configuring auction system");
     } catch(err) {
       handleTxError(err);
@@ -130,32 +130,6 @@ export default function DeployForm(): JSX.Element {
   return (
     <>
       <ContentWrapper>
-      <Center mb="12">					
-					<Stack>
-						<p className="text-2xl text-gray-800 font-normal">
-							Create an NFT collection!
-						</p>
-
-            <span>
-              {`Here's one of our `} <Link href="https://thecryptopoops.com/" isExternal color="blue.500">favourites.</Link>
-            </span>          
-												
-						<span>
-							<span className="font-bold text-lg">
-								{`1. `} 
-							</span>
-							Give your collection a name and symbol.
-						</span>		
-
-						<span>
-							<span className="font-bold text-lg">
-								{`2. `} 
-							</span>
-								Done! Pay the transaction costs and create your NFT collection.   
-						</span>																
-					</Stack>	
-				</Center> 
-
         <Center className="mt-8">
           <Stack>
 

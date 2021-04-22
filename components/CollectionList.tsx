@@ -59,7 +59,7 @@ export default function CollectionList({NFTs}: any): JSX.Element {
           <PopoverBody>
           <Stack 
             maxH="400px"
-            paddingBottom="16" 
+            paddingBottom="8" 
             overflowY="scroll"                  
           >
             <Center hidden={NFTs.length > 0}>

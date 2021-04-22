@@ -1,145 +1,96 @@
-import { useEffect, useState } from 'react';
-import { GetStaticProps } from 'next'
-
-import { useWeb3React } from '@web3-react/core';
-import { Web3Provider } from '@ethersproject/providers';
+import Image from 'next/image';
 
 import {
   Center, 
   HStack, 
   Link, 
-  Stack
+  Stack,
+  Button
 } from '@chakra-ui/react'
-import { ExternalLinkIcon, EmailIcon } from "@chakra-ui/icons";
+import { InfoOutlineIcon, ArrowRightIcon } from "@chakra-ui/icons";
 
-import MainForm from 'components/MainForm';
-import Account from 'components/Account';
-
-import { compileERC721 } from 'lib/compile';
-import { useDefaultSkyDB } from "lib/useSkyDB";
 import { ContentWrapper } from 'components/ContentWrapper';
-import Navbar from 'components/Navbar';
-import CollectionList from 'components/CollectionList';
 
 
-type ContractProps = {
-  NFT: any;
-  BidExecutor: any;
-}
-
-export const getStaticProps: GetStaticProps = async (context) => {
-
-  const {NFT, BidExecutor} = await compileERC721();
-
-  return {
-    props: {
-      NFT,
-      BidExecutor
-    }
-  }
-}
-
-export default function App({NFT, BidExecutor}: ContractProps) {
-  const context = useWeb3React<Web3Provider>()
-  const { account, chainId } = context
-
-  const { logContractAddress, getDataFromSkyDB, onboardUser } = useDefaultSkyDB();
-  const [contracts, setContracts] = useState<any[]>([]);
-
-  useEffect(() => {
-    
-    const onboard = async (acc: string) => {
-      try {
-        await onboardUser(acc);
-      } catch(err) {
-        console.log(err);
-      }
-    }
-    
-    if(account) onboard(account);
-  }, [account])
-
-  useEffect(() => {
-    const getTxs = async () => {
-      const data = await getDataFromSkyDB();
-      if(data) {
-        if (data[account as string]) {
-          
-          if(data[account as string].NFTs) {
-            const addressesInContracts = contracts.map((contract: any) => contract.address);
-            const addressesToAdd = data[account as string].NFTs.filter((contract: any) => contract.chainId == chainId && !addressesInContracts.includes(contract.address))
-            setContracts([...addressesToAdd])
-          };
-        }
-      }
-    }
-
-    if(account && chainId) {
-      getTxs()
-    } else {
-      setContracts([]);
-    }
-  }, [account, chainId])
-
-  const logNewContract = async (acc: string, contractAddr: string) => {
-    setContracts([...contracts, {
-      address: contractAddr,
-      chainId: chainId
-    }])
-
-    // console.log("Loggin new contract: ", contractAddr);
-    try {
-      await logContractAddress(acc, {
-        address: contractAddr,
-        chainId: chainId
-      })
-    } catch(err) {
-      console.log(err)
-    }
-  }
+export default function App(): JSX.Element {
+  
 
   return (
-    <>
-      <Navbar />
+    <>      
       <ContentWrapper>
         <Stack className="mt-16">
-          {/* <Center className="mt-16" mb="4">
-            <Stack>          
-              <p className="text-8xl font-black mb-4">
-                No bullshit NFT.
-              </p>                                      
-              <p  className="text-3xl font-light">
-                Mint an individual NFT or a collection without the extra platform bullshit.
-              </p>
-              <HStack>
-                <Link href="https://github.com/nkrishang/no-bs-nft" isExternal mr="8">
-                    Source code
-                </Link>
-                <Link href="https://twitter.com/NFTLabsHQ" isExternal>
-                    {"Built with @NFTLabsHQ"}
-                </Link>
-              </HStack>
-            </Stack>        
-          </Center> */}
-
-          <Center>
+          <Center mb="4">
             <Stack>
-              <Center mb="16">
-                <p className="text-2xl text-gray-600 font-light">
-                  Create and manage an NFT collection without the extra bullshit.
+              <Center>
+                <p className="text-8xl font-black mb-4">
+                  No bullshit NFT.
+                </p>   
+              </Center>          
+              <Center>
+                <p  className="text-3xl font-light center mb-8">
+                  Mint and manage an NFT collection without the extra platform bullshit.
                 </p>
               </Center>
-              <MainForm 
-                NFT={NFT} 
-                BidExecutor={BidExecutor} 
-                logContractAddress={logNewContract}
-              />
-            </Stack>     
+
+              <Center>
+                <div className="mb-16">
+                  <Link href="/create">
+                    <Button variant="link" rightIcon={<ArrowRightIcon boxSize="0.75em"/>}>                    
+                      <p className="text-gray-700 font-light text-lg">
+                        Create an NFT collection
+                      </p>                 
+                    </Button>
+                  </Link>
+                </div>
+              </Center>
+
+              <Center>
+                <HStack spacing="16">
+                  <Link href="https://discord.gg/baNTHHBD36" isExternal>
+                    <HStack spacing="4">
+                      <Image
+                        src="/discord-logo.png"
+                        width={24}
+                        height={24}
+                      />
+                      <p>
+                        Join us on Discord
+                      </p>
+                    </HStack>                                      
+                  </Link>
+
+                  <Link href="https://github.com/nkrishang/no-bs-nft" isExternal>
+                    <HStack spacing="4">
+                      <Image
+                        src="/github-logo.png"
+                        width={24}
+                        height={24}
+                      />
+                      <p>
+                        Source code
+                      </p>
+                    </HStack>                                      
+                  </Link>
+
+                  <Link href="https://www.notion.so/No-BS-NFTs-8f2b9490317e426587ef038b56e0bc8c" isExternal>
+                    <HStack spacing="4">
+                      {/* <Image
+                        src="/github-logo.png"
+                        width={64}
+                        height={64}
+                      /> */}
+                      <InfoOutlineIcon />
+                      <p>
+                        Docs
+                      </p>
+                    </HStack>                                      
+                  </Link>
+                </HStack>
+              </Center>
+            </Stack>        
           </Center>
         </Stack>
       </ContentWrapper>
-      
-      <CollectionList NFTs={contracts}/>
     </>
   )
 }

@@ -1,20 +1,59 @@
 import 'tailwindcss/tailwind.css'
 
 import { AppProps } from "next/app";
-import { ChakraProvider } from "@chakra-ui/react"
+import { ChakraProvider, Center } from "@chakra-ui/react"
 
 import { Web3Provider } from "@ethersproject/providers";
 import { Web3ReactProvider } from "@web3-react/core";
 
-import React from "react";
+import { useWeb3React } from '@web3-react/core';
+
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { MetaData } from "components/MetaData";
+
+import { GetStaticProps } from 'next'
+import { compileERC721 } from 'lib/compile';
+import { useDefaultSkyDB } from "lib/useSkyDB";
+
+import { ContractContext, ContractWrapper } from "lib/AppContext";
+import Navbar from 'components/Navbar';
+import CollectionList  from 'components/CollectionList';
+
+interface ModifiedAppProps extends AppProps {
+  NFT: any;
+  BidExecutor: any;
+}
+export const getStaticProps: GetStaticProps = async (context) => {
+
+  const {NFT, BidExecutor} = await compileERC721();
+
+  return {
+    props: {
+      NFT,
+      BidExecutor
+    }
+  }
+}
 
 function getLibrary(provider: any): Web3Provider {
   const library = new Web3Provider(provider);
   return library;
 }
 
-function App({ Component, pageProps }: AppProps): JSX.Element {
+function NavbarWrapper({ children }: any): JSX.Element {
+
+  const { contracts } = useContext(ContractContext);
+
+  return (
+    <>
+      <Navbar />
+      {children}
+      <CollectionList NFTs={contracts}/>
+    </>
+  )
+}
+
+function App({ NFT, BidExecutor, Component, pageProps }: ModifiedAppProps): JSX.Element {
 
   return (
     <>
@@ -22,8 +61,14 @@ function App({ Component, pageProps }: AppProps): JSX.Element {
       <Web3ReactProvider 
         getLibrary={getLibrary}
       >  
-        <ChakraProvider>                    
-          <Component {...pageProps} /> 
+        <ChakraProvider>   
+
+          <ContractWrapper NFT={NFT} BidExecutor={BidExecutor}>
+            <NavbarWrapper>
+              <Component {...pageProps} /> 
+            </NavbarWrapper>
+          </ContractWrapper>
+
         </ChakraProvider>           
       </Web3ReactProvider>
     </>
