@@ -2,14 +2,9 @@
 import {
   Center, 
   Link, 
-  SimpleGrid, 
-  Stack,
   Tooltip,
   useClipboard,
-  Text,
-  Flex,
-  Badge,
-  Box, 
+  Flex, 
   HStack
 } from '@chakra-ui/react'
 import { ExternalLinkIcon, CopyIcon } from "@chakra-ui/icons";
