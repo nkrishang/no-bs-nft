@@ -13,7 +13,7 @@ const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_KEY;
 const TEST_PRIVATE_KEY = process.env.TEST_PRIVATE_KEY;
 
 module.exports = {
-  solidity: "0.8.3",
+  solidity: "0.8.0",
   networks: {
     mainnet: {
       url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
@@ -24,11 +24,11 @@ module.exports = {
       accounts: [`${TEST_PRIVATE_KEY}`]
     },
     mumbai: {
-      url: "https://rpc-mumbai.maticvigil.com",
+      url: "https://rpc-mumbai.maticvigil.com/v1/084e575b9401d628d1507747de3e0f72ef07261c/",
       accounts: [`${TEST_PRIVATE_KEY}`]
     },
     matic: {
-      url: "https://rpc.maticvigil.com/?jwt=eyJhbGciOiJIUzI1NiJ9.a3Jpc2hhbmcubm90ZUBnbWFpbC5jb20.VM9Ae_oaBmEPbhAKH9nxq-ZwhAVlIEx_XhLirvfvswc",
+      url: "https://rpc-mainnet.maticvigil.com/v1/084e575b9401d628d1507747de3e0f72ef07261c/",
       accounts: [`${TEST_PRIVATE_KEY}`]
     }
   },

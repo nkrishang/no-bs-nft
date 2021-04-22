@@ -40,7 +40,7 @@
     "react-pdf": "^5.2.0",
     "shelljs": "^0.8.4",
     "skynet-js": "^3.0.2",
-    "solc": "^0.8.3",
+    "solc": "0.8.0",
     "swr": "^0.5.5"
   },
   "devDependencies": {

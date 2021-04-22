@@ -16,12 +16,12 @@ export const supportedIds: any = {
     name: "Matic",
     explorer: "https://explorer-mainnet.maticvigil.com/tx/",
     contractExplorer: "https://explorer-mainnet.maticvigil.com/address/",
-    url: "https://rpc.maticvigil.com/?jwt=eyJhbGciOiJIUzI1NiJ9.a3Jpc2hhbmcubm90ZUBnbWFpbC5jb20.VM9Ae_oaBmEPbhAKH9nxq-ZwhAVlIEx_XhLirvfvswc/"
+    url: "https://rpc-mainnet.maticvigil.com/v1/084e575b9401d628d1507747de3e0f72ef07261c/"
   },
   80001: {
     name: "Mumbai",
     explorer: "https://explorer-mumbai.maticvigil.com/tx/",
     contractExplorer: "https://explorer-mumbai.maticvigil.com/address/",
-    url: "https://rpc-mumbai.maticvigil.com"
+    url: "https://rpc-mumbai.maticvigil.com/v1/084e575b9401d628d1507747de3e0f72ef07261c"
   }
 }
