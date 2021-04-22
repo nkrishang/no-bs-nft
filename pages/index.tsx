@@ -52,6 +52,7 @@ export default function App(): JSX.Element {
                         src="/discord-logo.png"
                         width={24}
                         height={24}
+                        priority={true}
                       />
                       <p>
                         Join us on Discord
@@ -65,6 +66,7 @@ export default function App(): JSX.Element {
                         src="/github-logo.png"
                         width={24}
                         height={24}
+                        priority={true}
                       />
                       <p>
                         Source code
