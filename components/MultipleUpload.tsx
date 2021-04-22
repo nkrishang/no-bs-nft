@@ -240,6 +240,7 @@ export default function MultipleUpload({
 
   const handleMagicError = (err: any) => {
     setMagicLoading(false)
+    setUploadTokenLoading(false)
     setMagicLoadingText('')
     errorToast(
       toast,
@@ -435,7 +436,7 @@ export default function MultipleUpload({
                 >                  
 
                   {files.length > 0
-                    ? "Add one or more files"
+                    ? "Add one or more files" 
                     : "Choose one or more files"
                   }
                 </Button>
@@ -473,12 +474,13 @@ export default function MultipleUpload({
               id="token-amount" 
               placeholder="E.g. 1 (by default)"
             />
-            <Stack>
+            {/* <Stack> */}
               <Button 
                 onClick={totalFiles != 0 && skylinksToUpload.length == totalFiles
                   ? onOpen
                   : handleMultipleTokenUpload
                 }
+                // onClick={() => setUploadTokenLoading(true)}
                 isDisabled={(contractAddress == '' || totalFiles == 0 || (tokenAmount != '' && isNaN(parseInt(tokenAmount))) )} 
                 border={(totalFiles != 0 && skylinksToUpload.length == totalFiles) ? "2px" : ""}
                 borderColor={(totalFiles != 0 && skylinksToUpload.length == totalFiles) ? "green.500" : ""}
@@ -498,70 +500,70 @@ export default function MultipleUpload({
                   : ""
                 }
               </Text> */}
-            </Stack>
-            
-            <UploadModal 
-              NFT={NFT}
-              contractAddress={contractAddress}
-              transactions={tokensToUpload}
-              modalParams={{
-                isOpen: isOpen,                
-                onClose: onClose
-              }}
-              onSuccessfulTx={revertState}
-              magicParams={{
-                handleTransaction,
-                magicLoading,
-                magicSuccess,
-                handleMagicError,                
-                magicLoadingText
-              }}
-            />
-            
+            {/* </Stack> */}                        
           </Stack>
-          <Stack>
-          {imageSrc ? (
-              <ContentRenderer                                
-                src={imageSrc}
-                file={mediaFile}
-              />
-            ) : (
-              <Flex              
-                height="300px"
-                width="320px"
-                bg="transparent"
-                borderRadius="12px"
-                border="2px dashed #333"
-                align="center"
-                justify="center"
-                direction="column"
-              >
-                {skylinkLoading
-                  ? (
-                    <Stack>
-                      <Center>
-                        <p className="text-gray-400">
-                          Uploading to decentralized storage
-                        </p>
-                      </Center>
-                      <Center>
-                        <Spinner />
-                      </Center>                                                
-                    </Stack>                      
-                    )
-                  : <Text variant="label" color="#333">Media preview</Text>
-                }
-              </Flex>
-            )}
-            <Text>               
-              {totalFiles == 0
-                ? ""
-                : skylinksToUpload.length == totalFiles
 
-                  ? "All tokens prepared for your collection!"
-                  : `Queued ${files.length} ${files.length == 1 ? "file" : "files"}. You can preview and upload files one after another.`
-              }
-            </Text>
+          <UploadModal 
+            NFT={NFT}
+            contractAddress={contractAddress}
+            transactions={tokensToUpload}
+            modalParams={{
+              isOpen: isOpen,                
+              onClose: onClose
+            }}
+            onSuccessfulTx={revertState}
+            magicParams={{
+              handleTransaction,
+              magicLoading,
+              magicSuccess,
+              handleMagicError,                
+              magicLoadingText
+            }}
+          />
+
+          <Stack width="320px">
+            {imageSrc ? (
+                <ContentRenderer                                
+                  src={imageSrc}
+                  file={mediaFile}
+                />
+              ) : (
+                <Flex              
+                  height="300px"
+                  width="320px"
+                  bg="transparent"
+                  borderRadius="12px"
+                  border="2px dashed #333"
+                  align="center"
+                  justify="center"
+                  direction="column"
+                >
+                  {skylinkLoading
+                    ? (
+                      <Stack>
+                        <Center>
+                          <p className="text-gray-400">
+                            Uploading to decentralized storage
+                          </p>
+                        </Center>
+                        <Center>
+                          <Spinner />
+                        </Center>                                                
+                      </Stack>                      
+                      )
+                    : <Text variant="label" color="#333">Media preview</Text>
+                  }
+                </Flex>
+              )}
+              <Text>               
+                {totalFiles == 0
+                  ? ""
+                  : skylinksToUpload.length == totalFiles
+
+                    ? "All tokens prepared for your collection!"
+                    : `Queued ${files.length} ${files.length == 1 ? "file" : "files"}. You can preview and upload files one after another.`
+                }
+              </Text>
             </Stack>  
         </SimpleGrid>  
       </Center>

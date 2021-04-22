@@ -138,6 +138,12 @@ export default function MagicModal({magicLoading, handleMagicError, handleTransa
           have been uploaded to your collection.
         `}
       </Text>
+
+      <p className="text-green-700 text-base my-2" style={{display: !uploadTokenLoading ? "none" : ""}}>
+        {`
+          Please don't close the browser window until the loading indicator in the bottom right corner disappears.
+        `}
+      </p>
       
       <HStack my="4">
         <Input
