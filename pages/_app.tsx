@@ -10,6 +10,7 @@ import { useWeb3React } from '@web3-react/core';
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { MetaData } from "components/MetaData";
+import { Web3EagerConnector } from "components/Web3EagerConnector";
 
 import { GetStaticProps } from 'next'
 import { compileERC721 } from 'lib/compile';
@@ -46,7 +47,7 @@ function App({ Component, pageProps }: AppProps): JSX.Element {
         getLibrary={getLibrary}
       >  
         <ChakraProvider>   
-
+          <Web3EagerConnector />
           <ContractWrapper>
             <NavbarWrapper>
               <Component {...pageProps} /> 
