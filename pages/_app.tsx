@@ -1,20 +1,12 @@
 import 'tailwindcss/tailwind.css'
 
-import { AppProps } from "next/app";
-import { ChakraProvider, Center } from "@chakra-ui/react"
+import { ChakraProvider } from "@chakra-ui/react"
 
 import { Web3Provider } from "@ethersproject/providers";
-import { Web3ReactProvider } from "@web3-react/core";
-
-import { useWeb3React } from '@web3-react/core';
-
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { Web3ReactProvider } from "@web3-react/core";import React from "react";
 import { MetaData } from "components/MetaData";
 import { Web3EagerConnector } from "components/Web3EagerConnector";
 
-import { GetStaticProps } from 'next'
-import { compileERC721 } from 'lib/compile';
-import { useDefaultSkyDB } from "lib/useSkyDB";
 import { ContractWrapper } from "lib/AppContext";
 
 import NavbarWrapper from "components/NavbarWrapper";
@@ -24,23 +16,8 @@ function getLibrary(provider: any): Web3Provider {
   return library;
 }
 
-export const getStaticProps: GetStaticProps = async (context) => {
-
-  const {NFT, BidExecutor} = await compileERC721();
-
-  return {
-    props: {
-      NFT,
-      BidExecutor
-    }
-  }
-}
-
-function App({ NFT, BidExecutor, Component, pageProps }: any): JSX.Element {
-  console.log(
-    `NFT: ${NFT}`,
-    `BE: ${BidExecutor}`
-  )
+function App({Component, pageProps }: any): JSX.Element {
+  
   return (
     <>
       <MetaData />
@@ -49,7 +26,7 @@ function App({ NFT, BidExecutor, Component, pageProps }: any): JSX.Element {
       >  
         <ChakraProvider>   
           <Web3EagerConnector />
-          <ContractWrapper NFT={NFT} BidExecutor={BidExecutor}>
+          <ContractWrapper>
             <NavbarWrapper>
               <Component {...pageProps} /> 
             </NavbarWrapper>

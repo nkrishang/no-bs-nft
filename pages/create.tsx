@@ -21,10 +21,24 @@ import { errorToast, successToast } from "lib/toast";
 
 import { ContractContext } from "lib/AppContext";
 
+import { GetStaticProps } from 'next'
+import { compileERC721 } from 'lib/compile';
 
-export default function DeployForm(): JSX.Element {
+export const getStaticProps: GetStaticProps = async (context) => {
+
+  const {NFT, BidExecutor} = await compileERC721();
+
+  return {
+    props: {
+      NFT,
+      BidExecutor
+    }
+  }
+}
+
+export default function DeployForm({NFT, BidExecutor}: any): JSX.Element {
   
-  const { logNewContract, setContractAddress, handleNewContract, NFT, BidExecutor } = useContext(ContractContext);
+  const { logNewContract, setContractAddress, handleNewContract } = useContext(ContractContext);
 
   const toast = useToast();
   const context = useWeb3React<Web3Provider>()

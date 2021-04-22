@@ -12,9 +12,23 @@ import { ContentWrapper } from 'components/ContentWrapper';
 import MultipleUpload from "components/MultipleUpload";
 import { ContractContext } from 'lib/AppContext';
 
-export default function UploadForm(): JSX.Element {
+import { GetStaticProps } from 'next'
+import { compileERC721 } from 'lib/compile';
 
-	const { contractAddress, setContractAddress, NFT } = useContext(ContractContext);
+export const getStaticProps: GetStaticProps = async (context) => {
+
+  const {NFT} = await compileERC721();
+
+  return {
+    props: {
+      NFT
+    }
+  }
+}
+
+export default function UploadForm({NFT}: any): JSX.Element {
+
+	const { contractAddress, setContractAddress } = useContext(ContractContext);
 
   // console.log( "ABI: ", NFT.abi)
   return (
