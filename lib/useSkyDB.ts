@@ -50,8 +50,9 @@ export default function useSkyDB(dataKey: string, seed: string): any {
         dataKey
       );
 
-      // console.log("Data from SkyDB: ", data);
-      // console.log("Revisions to SkyDB: ", revision);
+      console.log("Data from SkyDB: ", data);
+      console.log(Object.keys(data));     
+      console.log("Revisions to SkyDB: ", revision);
 
       return data;
     } catch (error) {

@@ -19,10 +19,11 @@ export const uploadMetadataToSkynet = async (metadata: NFTMetadata) => {
 
   try {
     const { skylink } = await skyportal.uploadFile(metadataFile);
+    const parsedSkylink: string | null = parseSkylink(skylink);
       
     console.log("Metadata Skylink: ", skylink);
 
-    return skylink;
+    return portal + parsedSkylink;
   } catch (err) {
     console.log(err);
   }

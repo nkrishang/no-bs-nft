@@ -166,7 +166,7 @@ export default function MultipleUpload({
         image: mediaSkylink
       });
 
-      setSkylinksToUpload([...skylinksToUpload, metadataSkylink]);
+      setSkylinksToUpload([...skylinksToUpload, metadataSkylink as string]);
       setTokensToUpload([
         ...tokensToUpload,
         {
